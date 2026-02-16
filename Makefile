@@ -19,7 +19,7 @@ FLAGS		=	rcs
 # 					INCLUDES
 # | ================================================ |
 
-INCLUDES	=	-I includes -I includes/core -I includes/systems/writing
+INCLUDES	=	-I includes #-I includes/core -I includes/systems/writing
 
 # | ================================================ |
 # 					SOURCE FILES
@@ -28,9 +28,17 @@ INCLUDES	=	-I includes -I includes/core -I includes/systems/writing
 SRC			=	core/manager.c \
 				core/dispatcher.c \
 \
+				tools/memory.c \
+				tools/systems.c \
+\
 				systems/writing/_internal.c \
 				systems/writing/commands.c \
-				systems/writing/system.c
+				systems/writing/system.c \
+\
+				systems/filesystem/_internal.c \
+				systems/filesystem/_os.c \
+				systems/filesystem/commands.c \
+				systems/filesystem/system.c \
 
 # | ================================================ |
 # 					OBJ FILES

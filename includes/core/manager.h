@@ -1,19 +1,22 @@
 #ifndef SEED_MANAGER_H
 # define SEED_MANAGER_H
 
-# include <sys/types.h>
-# include <stdbool.h>
+# include "dependency.h"
 
 // +===----- Types -----===+ //
 
-typedef struct s_Command	t_Command;
-typedef struct s_Dispatcher	t_Dispatcher;
-typedef struct s_WritingCtx	t_WritingCtx;
+typedef enum e_ErrorCode		t_ErrorCode;
+typedef struct s_Command		t_Command;
+typedef struct s_Dispatcher		t_Dispatcher;
+typedef struct s_WritingCtx		t_WritingCtx;
+typedef struct s_FileSystemCtx	t_FileSystemCtx;
 
+/* The seed API manager */
 typedef struct	s_Manager
 {
-	t_Dispatcher		*dispatcher;
-	t_WritingCtx		*writing_ctx;
+	t_Dispatcher		*dispatcher;	/* The dispatcher */
+	t_WritingCtx		*writing_ctx;	/* The writing context */
+	t_FileSystemCtx		*fs_ctx;	/* The filesysten context */
 }	t_Manager;
 
 // +===----- Functions -----===+ //
@@ -34,8 +37,8 @@ void		manager_clean(t_Manager *manager);
  * @brief Clean the seed core manager.
  * @param manager The manager.
  * @param cmd The command content.
- * @return TRUE for success or FALSE if an error occured.
+ * @return An error code or SUCCESS (=0).
 */
-bool		manager_exec(t_Manager *manager, t_Command *cmd);
+t_ErrorCode	manager_exec(t_Manager *manager, t_Command *cmd);
 
 #endif

@@ -1,84 +1,92 @@
-#ifndef SEED_WRITING_COMMANDS_H
-# define SEED_WRITING_COMMANDS_H
+#ifndef SEED_FILESYSTEM_COMMANDS_H
+# define SEED_FILESYSTEM_COMMANDS_H
 
 # include "core/manager.h"
 
-// +===----- Buffer -----===+ //
+// +===----- Root -----===+ //
 
 /**
- * @brief Creates a new empty buffer.
+ * @brief Open the root.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_buffer_create(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_root_open(t_Manager *manager, const t_Command *cmd);
 
 /**
- * @brief Destroys the given buffer.
+ * @brief Close the root.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_buffer_destroy(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_root_close(t_Manager *manager, const t_Command *cmd);
 
-// +===----- Lines -----===+ //
+// +===----- Directory -----===+ //
 
 /**
- * @brief Adds the line to the index of the buffer.
+ * @brief Create a directory.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_buffer_line_insert(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_directory_create(t_Manager *manager, const t_Command *cmd);
 
 /**
- * @brief Delete the given line.
+ * @brief Delete a directory.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_buffer_line_delete(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_directory_delete(t_Manager *manager, const t_Command *cmd);
 
 /**
- * @brief Splits the given line in two lines.
+ * @brief Move a directory.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_buffer_line_split(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_directory_move(t_Manager *manager, const t_Command *cmd);
+
+// +===----- Files -----===+ //
 
 /**
- * @brief Joins the givens line in one line.
+ * @brief Create a file.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_buffer_line_join(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_file_create(t_Manager *manager, const t_Command *cmd);
 
 /**
- * @brief Get the line of the given index.
+ * @brief Delete a file.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_buffer_get_line(t_Manager *manager, const t_Command *cmd);
-
-// +===----- Data -----===+ //
+t_ErrorCode	cmd_file_delete(t_Manager *manager, const t_Command *cmd);
 
 /**
- * @brief Insert the data to the given line.
+ * @brief Move a file.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_line_insert_data(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_file_move(t_Manager *manager, const t_Command *cmd);
 
 /**
- * @brief Delete the data to the given line.
+ * @brief Read a file.
  * @param manager The manager that will contains contexts.
  * @param cmd The content of the command.
  * @return An error code or SUCCESS (=0).
 */
-t_ErrorCode	cmd_line_delete_data(t_Manager *manager, const t_Command *cmd);
+t_ErrorCode	cmd_file_read(t_Manager *manager, const t_Command *cmd);
+
+/**
+ * @brief Write inside a file.
+ * @param manager The manager that will contains contexts.
+ * @param cmd The content of the command.
+ * @return An error code or SUCCESS (=0).
+*/
+t_ErrorCode	cmd_file_write(t_Manager *manager, const t_Command *cmd);
 
 #endif

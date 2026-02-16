@@ -1,38 +1,26 @@
-#include <stdlib.h>
-#include "core/manager.h"
 #include "core/dispatcher.h"
+#include "tools/systems.h"
 #include "systems/writing/_internal.h"
+#include "systems/writing/commands.h"
 #include "systems/writing/system.h"
 
 // +===----- Commands Definition -----===+ //
 
 const t_CommandEntry	writing_commands[] = {
-	{ CMD_WRITING_CREATE_BUFFER,	cmd_buffer_create},
-	{ CMD_WRITING_DELETE_BUFFER,	cmd_buffer_destroy},
-
-	{ CMD_WRITING_INSERT_LINE,		cmd_buffer_line_insert},
-	{ CMD_WRITING_DELETE_LINE,		cmd_buffer_line_destroy},
-	{ CMD_WRITING_SPLIT_LINE,		cmd_buffer_line_split},
-	{ CMD_WRITING_JOIN_LINE,		cmd_buffer_line_join},
-	{ CMD_WRITING_GET_LINE,			cmd_buffer_get_line},
-
-	{ CMD_WRITING_INSERT_TEXT,		cmd_line_add_data},
-	{ CMD_WRITING_DELETE_TEXT,		cmd_line_delete_data},
+	{ CMD_WRITING_CREATE_BUFFER,	sizeof(t_CmdCreateBuffer),	cmd_buffer_create},
+	{ CMD_WRITING_DELETE_BUFFER,	sizeof(t_CmdDestroyBuffer),	cmd_buffer_destroy},
+	
+	{ CMD_WRITING_INSERT_LINE,		sizeof(t_CmdInsertLine),	cmd_buffer_line_insert},
+	{ CMD_WRITING_DELETE_LINE,		sizeof(t_CmdDeleteLine),	cmd_buffer_line_delete},
+	{ CMD_WRITING_SPLIT_LINE,		sizeof(t_CmdSplitLine),		cmd_buffer_line_split},
+	{ CMD_WRITING_JOIN_LINE,		sizeof(t_CmdJoinLine),		cmd_buffer_line_join},
+	{ CMD_WRITING_GET_LINE,			sizeof(t_CmdGetLine),		cmd_buffer_get_line},
+	
+	{ CMD_WRITING_INSERT_TEXT,		sizeof(t_CmdInsertData),	cmd_line_insert_data},
+	{ CMD_WRITING_DELETE_TEXT,		sizeof(t_CmdDeleteData),	cmd_line_delete_data}
 };
 
-static bool	register_commands(t_Dispatcher *dispatcher, const t_CommandEntry *commands, size_t size)
-{
-	size_t	_i;
-
-	_i = 0;
-	while (_i < size)
-	{
-		if (false == dispatcher_register(dispatcher, commands[_i].id, commands[_i].fn))
-			return (false);
-		_i++;
-	}
-	return (true);
-}
+// +===----- Functions -----===+ //
 
 bool	writing_init(t_Manager	*manager)
 {

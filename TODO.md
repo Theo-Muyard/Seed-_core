@@ -24,28 +24,28 @@
 
 **Impact:** Homogénéité, lisibilité, cohérence globale
 
-- 🟨 **Audit complet des noms publics**
-  - [ ] Analyser tous les symboles exposés dans `seed.h`
-  - [ ] Ajouter / vérifier les conventions de nommage (snake_case, préfixes)
-  - [ ] Documenter / modifier les incohérences trouvées
-  - [ ] Créer une table de migration
+- ✅ **Audit complet des noms publics**
+  - [x] Analyser tous les symboles exposés dans `seed.h`
+  - [x] Ajouter / vérifier les conventions de nommage (snake_case, préfixes)
+  - [x] Documenter / modifier les incohérences trouvées
+  - [x] Créer une table de migration
 
-- ⬜ **Normaliser le code**
-  - [ ] Prefixer les fonctions / emums de leur contexte (`manager_*`, `dispatcher_*`, etc...)
-  - [ ] Ajouter / verifier la norme des systemes (internal,  commandes, system)
-  - [ ] S'assurer que les structures ont le préfixe `t_`, les enums `e_`, les structure `s_`
+- ✅ **Normaliser le code**
+  - [x] Prefixer les fonctions / emums de leur contexte (`manager_*`, `dispatcher_*`, etc...)
+  - [x] Ajouter / verifier la norme des systemes (internal,  commandes, system)
+  - [x] S'assurer que les structures ont le préfixe `t_`, les enums `e_`, les structure `s_`
 
-- ⬜ **Homogénéiser les conventions de paramètres**
-  - [ ] Les erreurs / status toujours en dernier paramètre?
-  - [ ] Les handles toujours en premier?
-  - [ ] Les outputs toujours pointeurs?
-  - [ ] Documenter la convention finale
+- ✅ **Homogénéiser les conventions de paramètres**
+  - [x] Les erreurs / status toujours en dernier paramètre?
+  - [x] Les handles toujours en premier?
+  - [x] Les outputs toujours pointeurs?
+  - [x] Documenter la convention finale
 
-- ⬜ **Renommer et migrer progressivement**
-  - [ ] Lister les changements de noms (old → new)
-  - [ ] Migrer les tests
-  - [ ] Migrer les examples/docs
-  - [ ] Retirer les anciens noms
+- ✅ **Renommer et migrer progressivement**
+  - [x] Lister les changements de noms (old → new)
+  - [x] Migrer les tests
+  - [x] Migrer les examples/docs
+  - [x] Retirer les anciens noms
 
 ---
 
@@ -53,22 +53,17 @@
 
 **Impact:** Debuggage facile, traçabilité, contrôle d'erreur
 
-- ⬜ **Concevoir la structure d'erreur**
-  - [ ] Créer un enum `t_ErrorCode` avec tous les codes d'erreurs possibles
-  - [ ] Ajouter des codes pour chaque système (Manager, Dispatcher, Writing, FileSystem, etc...)
-  - [ ] Ajouter des codes pour les erreurs communes (allocation, validation, etc)
-  - [ ] Exemple : `ERR_BUFFER_NOT_FOUND`, `ERR_INVALID_PAYLOAD`, etc
+- ✅ **Concevoir la structure d'erreur**
+  - [x] Créer un enum `t_ErrorCode` avec tous les codes d'erreurs possibles
+  - [x] Ajouter des codes pour chaque système (Manager, Dispatcher, Writing, FileSystem, etc...)
+  - [x] Ajouter des codes pour les erreurs communes (allocation, validation, etc)
+  - [x] Exemple : `ERR_BUFFER_NOT_FOUND`, `ERR_INVALID_PAYLOAD`, etc
 
-- ⬜ **Créer la structure de retour**
-  - [ ] Définir `t_Result` ou `t_Status` (avec code + message optionnel)
-  - [ ] Ou créer des fonctions qui remplissent une `t_Error` en output
-  - [ ] Décider: retour booléen → retour structuré ou output param?
-
-- ⬜ **Mettre à jour toutes les fonctions**
-  - [ ] Manager : `manager_exec()`, `manager_init()`, etc
-  - [ ] Dispatcher : toutes les fonctions
-  - [ ] Writing system : toutes les fonctions
-  - [ ] Tests : vérifier les codes d'erreur
+- ✅ **Mettre à jour toutes les fonctions**
+  - [x] Manager : `manager_exec()`, `manager_init()`, etc
+  - [x] Dispatcher : toutes les fonctions
+  - [x] Writing system : toutes les fonctions
+  - [x] Tests : vérifier les codes d'erreur
 
 ---
 
@@ -76,80 +71,30 @@
 
 **Impact:** Sécurité, stabilité, prévention de crash
 
-- ⬜ **Créer un validateur générique**
-  - [ ] Définir un schéma de validation (structure descriptive)
-  - [ ] Implémenter `validate_payload()` générique
-  - [ ] Supporter min/max de taille, types, formats
-  - [ ] Support des champs obligatoires vs optionnels
-
-- ⬜ **Schémas de validation par commande**
-  - [ ] Créer un schéma pour chaque command (MAP ou table)
-  - [ ] Exemple : `CMD_WRITING_CREATE_BUFFER` → schema avec champs attendus
-  - [ ] Documenter les schémas dans la docstring de la commande
-
-- ⬜ **Validation centralisée dans dispatcher**
-  - [ ] Valider chaque payload avant d'appeler le handler
-  - [ ] Retourner l'erreur de validation si invalide
-  - [ ] Logger les validations échouées
-
-- ⬜ **Cas limites & sécurité**
-  - [ ] NULL payloads (ok? ou erreur?)
-  - [ ] Buffers overflow (size > MAX_PAYLOAD_SIZE?)
-  - [ ] Champs string : vérifier null-termination
-  - [ ] Nested structures : validation récursive?
-
-- ⬜ **Tests exhaustifs**
-  - [ ] Valeur nulle pour chaque champ requis
-  - [ ] Valeurs limites (min, max)
-  - [ ] Strings malformées
-  - [ ] Payloads trop volumineux
-  - [ ] Payloads vides
-
+- ✅ **Créer un validateur générique**
+  - [x] Définir un schéma de validation (structure descriptive)
 ---
 
 ### 4️⃣ Système de Gestion de Fichiers
 
 **Impact:** Persistance, import/export, intégration système
 
-- ⬜ **Spécifier l'API de fichiers**
-  - [ ] Créer les headers `includes/systems/filesystem`
-  - [ ] Définir les opérations : create, delete, open, save, close
-  - [ ] Supporter les chemins absolus et relatifs
-  - [ ] Supporter encodage UTF-8 minimum
+- ✅ **Spécifier l'API de fichiers**
+  - [x] Créer les headers `includes/systems/filesystem`
+  - [x] Définir les opérations : open, close, create, delete, move, save, read, write
 
-- ⬜ **Opération : Ouvrir un fichier**
-  - [ ] `filesystem_open(path, mode)` → file_handle
-  - [ ] Charger dans un nouveau buffer
-  - [ ] Détecter l'encodage automatiquement
-  - [ ] Retourner erreur si fichier inexistant
-  - [ ] Mapping fichier ↔ buffer_id pour tracking
 
-- ⬜ **Opération : Sauvegarder un buffer**
-  - [ ] `filesystem_save(buffer_id, path)` → erreur ou succès
-  - [ ] Supporter overwrite/no-overwrite
-  - [ ] Créer le répertoire parent si besoin
-  - [ ] Atomic write (écrire dans temp, puis rename)
-  - [ ] Préserver permissions/timestamps optionnels
+- ✅ **Intégration avec le Manager**
+  - [x] Ajouter les commandes filesystem au dispatcher
+  - [x] Ajouter les commandes au header + handle erreurs
 
-- ⬜ **Opération : Fermer un fichier**
-  - [ ] `filesystem_close(file_handle)`
-  - [ ] Nettoyer les ressources
-  - [ ] Optionnel: sauvegarder avant fermeture?
-  - [ ] Optionnel: demander confirmation si modifié?
+- ✅ **Gestion des erreurs fichiers**
+  - [x] Permissions insuffisantes
+  - [x] Fichier verrouillé (par autre processus)
+  - [x] Encodage invalide
+  - [x] Chemin invalide
 
-- ⬜ **Intégration avec le Manager**
-  - [ ] Ajouter les commandes filesystem au dispatcher
-  - [ ] Mapping persistent des fichiers ouverts
-  - [ ] Gestion des buffers < → > fichiers
-
-- ⬜ **Gestion des erreurs fichiers**
-  - [ ] Permissions insuffisantes
-  - [ ] Disque plein
-  - [ ] Fichier verrouillé (par autre processus)
-  - [ ] Encodage invalide
-  - [ ] Chemin invalide
-
-- ⬜ **Bonus : Watch des fichiers**
+- ⚠️ **Bonus : Watch des fichiers**
   - [ ] Détecter si fichier modifié par processus externe
   - [ ] Proposer reload ou merge
   - [ ] Optionnel pour v0.2.5?
@@ -158,29 +103,17 @@
 
 ### 5️⃣ Amélioration Générale
 
-- ⬜ **Couverture de tests**
+- 🟨 **Couverture de tests**
   - [ ] Viser >80% de couverture
   - [ ] Tests pour tous les codes erreur
   - [ ] Tests limites et edge cases
   - [ ] Intégration tests (multi-système)
 
-- ⬜ **Documentation**
+- 🟨 **Documentation**
   - [ ] Mettre à jour README avec v0.2 changes
   - [ ] Documenter les codes erreur
   - [ ] Ajouter examples pour filesystem
   - [ ] Créer migration guide depuis v0.1
-
-- ⬜ **Performance**
-  - [ ] Profiler les opérations critiques
-  - [ ] Optimiser allocations mémoire
-  - [ ] Benchmark vs baseline v0.1
-
-- ⬜ **Code quality**
-  - [ ] Lancer les linters
-  - [ ] Fixer les warnings
-  - [ ] Revoir les conventions de code
-
----
 
 ---
 
@@ -188,39 +121,18 @@
 
 > Après v0.2 stable | Nouvelles capabilities
 
-### Features à explorer
-
 - ⬜ **Undo/Redo System**
   - [ ] Stack d'opérations
   - [ ] Replay d'opérations
   - [ ] Limite de profondeur (configurable)
 
-- ⬜ **Encodage multi-format**
-  - [ ] UTF-8, UTF-16, Latin-1, etc
-  - [ ] Détection automatique + override manuel
-  - [ ] Conversion transparent
+- ⬜ **Encodage unicode**
+  - [ ] Passer d'ASCII a UNICODE : writing system
+  - [ ] Line: passage de len -> size
+  - [ ] Conversion index -> emplacement de l'unicode dans le tableau data
 
-- ⬜ **Selection & Range**
-  - [ ] Notion de selection dans buffer
-  - [ ] Operations sur ranges (copy, delete, format)
-  - [ ] Multi-selection?
-
-- ⬜ **Search & Replace**
-  - [ ] Find in buffer
-  - [ ] Replace with validation
-  - [ ] Regex support (optionnel)
-  - [ ] Find in all files (filesystem)
-
-- ⬜ **Diff & Merge**
-  - [ ] Comparer deux buffers
-  - [ ] Générer diffs
-  - [ ] Merge strategies
-
-- ⬜ **Collaboration (RTC)**
-  - [ ] Operational Transforms?
-  - [ ] CRDT?
-  - [ ] Multi-client support
-  - [ ] Conflict resolution
+- ⬜ **Resync fs**
+  - [ ] Resync le VFS via les events OS (linux only)
 
 ---
 
@@ -315,9 +227,9 @@ v0.2 (Fondations: Erreurs, Validation, FS)
 ## 📝 Notes de Développement
 
 ### Conventions Décidées
-- [ ] Préfixes à utiliser: `seed_`, `manager_`, `dispatcher_`, etc
-- [ ] Codes erreur: enum vs defines?
-- [ ] Structure retour d'erreur: struct vs out param?
+- [x] Préfixes à utiliser: `seed_`, `manager_`, `dispatcher_`, etc
+- [x] Codes erreur: enum vs defines?
+- [x] Structure retour d'erreur: struct vs out param?
 - [ ] Max payload size: À décider
 
 ### Considérations Architecturales

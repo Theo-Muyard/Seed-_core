@@ -1,25 +1,25 @@
 #ifndef SEED_WRITING_SYSTEM_H
 # define SEED_WRITING_SYSTEM_H
 
-# include <stdbool.h>
-# include "systems/writing/commands.h"
+# include "dependency.h"
+# include "core/dispatcher.h"
 
 // +===----- Types -----===+ //
 
-typedef struct s_CommandEntry	t_CommandEntry;
 typedef struct s_Manager		t_Manager;
 typedef struct s_Buffer			t_Buffer;
 
+/* The writing context of the seed core */
 typedef struct s_WritingCtx
 {
-	t_Buffer	**buffers;
-	size_t		count;
-	size_t		capacity;
+	t_Buffer	**buffers;	/* All buffers in the writing context */
+	size_t		count;	/* The count of buffers */
+	size_t		capacity;	/* The capacity of buffers */
 }	t_WritingCtx;
 
 // +===----- Commands -----===+ //
 
-#define WRITING_COMMANDS_COUNT 9
+# define WRITING_COMMANDS_COUNT 9
 
 extern const t_CommandEntry	writing_commands[];
 

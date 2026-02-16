@@ -1,24 +1,25 @@
 #ifndef SEED_WRITING_INTERNAL_H
 # define SEED_WRITING_INTERNAL_H
 
-# include <sys/types.h>
-# include <stdbool.h>
+# include "dependency.h"
 
 // +===----- Types -----===+ //
 
+/* A line in writing system */
 typedef struct	s_Line
 {
-	char			*data;
-	size_t			len;
-	size_t			capacity;
-	struct s_Line	*prev;
-	struct s_Line	*next;
+	char			*data;	/* The data content */
+	size_t			len;	/* The data len content */
+	size_t			capacity;	/* The data capacity */
+	struct s_Line	*prev;	/* The previous line */
+	struct s_Line	*next; 	/* The next line */
 }	t_Line;
 
+/* A buffer in writing system */
 typedef struct	s_Buffer
 {
-	t_Line	*line;
-	ssize_t	size;
+	t_Line	*line;	/* The  first line */
+	size_t	size;	/* The count of lines */
 }	t_Buffer;
 
 // +===----- Buffer -----===+ //
@@ -94,7 +95,7 @@ t_Line		*buffer_get_line(t_Buffer *buffer, ssize_t index);
  * @param data The data that will be added.
  * @return TRUE for success or FALSE if an error occured.
 */
-bool		line_add_data(t_Line *line, ssize_t column, size_t size, const char *data);
+bool		line_insert_data(t_Line *line, ssize_t column, size_t size, const char *data);
 
 /**
  * @brief Delete the data to the given line.
@@ -103,6 +104,6 @@ bool		line_add_data(t_Line *line, ssize_t column, size_t size, const char *data)
  * @param size The size of the data.
  * @return TRUE for success or FALSE if an error occured.
 */
-bool		line_delete_data(t_Line *line, ssize_t column, size_t size);
+bool		line_delete_data(t_Line *line, size_t column, size_t size);
 
 #endif
