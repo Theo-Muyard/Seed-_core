@@ -111,6 +111,7 @@ static bool	delete_pending(
 		_pending = ctx->pending[_i];
 		if (_pending->cookie == cookie)
 		{
+			free(_pending->from_path);
 			free(_pending);
 			memmove(
 				ctx->pending + _i,
@@ -370,7 +371,7 @@ t_FsEvent	*handle_event
 	t_FsEvent		*ev;
 	t_MovePending	*_pending;
 
-	if ((event->mask & IN_MOVED_FROM) &&  (event->mask & IN_ISDIR))
+	if ((event->mask & IN_MOVED_FROM) && (event->mask & IN_ISDIR))
 	{
 		printf("Move from dir: %s\n", path);
 		create_pending(ctx, event->cookie, path, true);
@@ -435,6 +436,13 @@ t_FsEvent	*handle_event
 	ev->path = ft_strdup(path);
 	if (NULL == ev->path)
 		return (free(ev), NULL);
+	if ((event->mask & IN_MOVE_SELF) || (event->mask & IN_DELETE_SELF))
+	{
+		printf("===> SELF\n");
+		ev->isdir = true;
+		ev->type = FS_EVENT_DELETE;
+		return (ev);
+	}
 	if ((event->mask & IN_CREATE) && (event->mask & IN_ISDIR))
 	{
 		printf("Create dir: %s\n", path);
@@ -450,7 +458,8 @@ t_FsEvent	*handle_event
 		ev->type = FS_EVENT_CREATE;
 		return (ev);
 	}
-	if ((event->mask & IN_DELETE) && (event->mask & IN_ISDIR))
+	if ((event->mask & IN_DELETE || event->mask & IN_DELETE_SELF)
+		&& (event->mask & IN_ISDIR))
 	{
 		printf("Delete dir: %s\n", path);
 		if (false == watch_remove_recursive(ctx, path))

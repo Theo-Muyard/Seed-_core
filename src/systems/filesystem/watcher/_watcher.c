@@ -91,8 +91,16 @@ bool		watcher_analyze(t_WatchCtx *ctx)
 		_parent_path = watch_get_path(ctx, _event->wd);
 		if (_event->mask & IN_Q_OVERFLOW || NULL == _parent_path)
 			return (NULL);
-		_entry_path = join_path(_parent_path, _event->name);
-		TEST_NULL(_entry_path, NULL);
+		if (_event->len > 0)
+		{
+			_entry_path = join_path(_parent_path, _event->name);
+			TEST_NULL(_entry_path, NULL);
+		}
+		else
+		{
+			_entry_path = ft_strdup(_parent_path);
+			TEST_NULL(_entry_path, NULL);
+		}
 		_fs_event = handle_event(ctx, _event, _entry_path);
 		if (NULL == _fs_event)
 		{
@@ -118,22 +126,22 @@ bool		watcher_analyze(t_WatchCtx *ctx)
 // TODO: delete
 void print_event(t_FsEvent *event)
 {
-	if (event->type == 0)
+	if (event->type == FS_EVENT_CREATE)
 	{
 		printf("-> EVENT: CREATE (%s)\n-> Path: %s\n", event->isdir ? "dir" : "file", event->path);
 		return ;
 	}
-	if (event->type == 1)
+	if (event->type == FS_EVENT_DELETE)
 	{
 		printf("-> EVENT: DELETE (%s)\n-> Path: %s\n", event->isdir ? "dir" : "file", event->path);
 		return ;
 	}
-	if (event->type == 2)
+	if (event->type == FS_EVENT_MOVE)
 	{
 		printf("-> EVENT: MOVE (%s)\n-> Old path: %s\n-> New path: %s\n", event->isdir ? "dir" : "file", event->path, event->new_path);
 		return ;
 	}
-	if (event->type == 3)
+	if (event->type == FS_EVENT_OVERFLOW)
 	{
 		printf("-> EVENT: OVERFLOW (%s)\n", event->isdir ? "dir" : "file");
 		return ;
@@ -152,7 +160,7 @@ int	main(void)
 		return (watcher_destroy(_ctx), 1);
 	printf("Watching...\n");
 	int	count = 0;
-	while (count < 10)
+	while (count < 5)
 	{
 		if (false == watcher_analyze(_ctx))
 			return (printf("Watcher error\n"), watcher_destroy(_ctx), 1);
