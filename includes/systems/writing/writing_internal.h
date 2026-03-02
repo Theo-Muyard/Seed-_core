@@ -12,6 +12,8 @@
 
 # include "dependency.h"
 
+#define DATA_ALLOC 256
+
 // +===----- Types -----===+ //
 
 /* A line in writing system */
@@ -50,7 +52,7 @@ t_Buffer	*buffer_create(void);
 */
 void		buffer_destroy(t_Buffer *buffer);
 
-// +===----- Lines functions -----===+ //
+// +===----- Line functions -----===+ //
 
 /**
  * @brief Creates a new empty line.

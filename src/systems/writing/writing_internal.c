@@ -1,87 +1,101 @@
-#include <stdlib.h>
-#include <string.h>
 #include "systems/writing/writing_internal.h"
 
-#define DATA_ALLOC 256
-
-// +===----- BUFFER -----===+ //
+// +===----- Buffer functions -----===+ //
 
 t_Buffer	*buffer_create(void)
 {
-	t_Buffer	*buffer;
+	t_Buffer	*buffer = malloc(sizeof(t_Buffer));
+	RETURN_IF_NULL(buffer, NULL);
 
-	buffer = malloc(sizeof(t_Buffer));
-	TEST_NULL(buffer, NULL);
 	buffer->line = NULL;
-	buffer->size = 0;
+	buffer->count = 0;
+
 	return (buffer);
 }
 
 void		buffer_destroy(t_Buffer *buffer)
 {
-	t_Line	*_tmp;
-
 	if (NULL == buffer)
 		return ;
+
 	while (buffer->line)
 	{
-		_tmp = buffer->line->next;
+		t_Line	*_tmp = buffer->line->next;
 		buffer_line_destroy(buffer, buffer->line);
 		buffer->line = _tmp;
 	}
 	free(buffer);
 }
 
-// +===----- LINES -----===+ //
+// +===----- Line functions -----===+ //
 
 t_Line		*line_create(void)
 {
-	t_Line	*line;
+	t_Line	*line = malloc(sizeof(t_Line));
+	RETURN_IF_NULL(line, NULL);
 
-	line = malloc(sizeof(t_Line));
-	TEST_NULL(line, NULL);
 	line->data = NULL;
 	line->size = 0;
 	line->capacity = 0;
 	line->prev = NULL;
 	line->next = NULL;
+
 	return (line);
 }
 
 void		buffer_line_destroy(t_Buffer *buffer, t_Line *line)
 {
-	t_Line	*_prev;
-	t_Line	*_next;
-
 	if (NULL == line)
 		return ;
-	
-	_prev = line->prev;
-	_next = line->next;
+
+	t_Line	*_prev = line->prev;
+	t_Line	*_next = line->next;
+
 	if (_prev)
 		_prev->next = _next;
 	else
 		buffer->line = _next;
 	if (_next)
 		_next->prev = _prev;
-	if (buffer->size > 0)
-		buffer->size--;
+	if (buffer->count > 0)
+		buffer->count--;
+
 	free(line->data);
+	line->data = NULL;
 	free(line);
+}
+
+t_Line		*buffer_get_line(t_Buffer *buffer, ssize_t index)
+{
+	RETURN_IF_NULL(buffer, NULL);
+
+	if (index < 0)
+		index = buffer->count;
+
+	if ((size_t)index >= buffer->count)
+		return (NULL);
+
+	t_Line	*_tmp = buffer->line;
+	size_t	_i = 0;
+
+	while (_tmp && _i < index - 1)
+	{
+		_tmp = _tmp->next;
+		_i++;
+	}
+	return (_tmp);
 }
 
 bool		buffer_line_insert(t_Buffer *buffer, t_Line *line, ssize_t index)
 {
-	t_Line	*_tmp;
-	ssize_t	_i;
-
-	TEST_NULL(buffer, false);
-	TEST_NULL(line, false);
+	RETURN_IF_NULL(buffer, NULL);
+	RETURN_IF_NULL(line, NULL);
 
 	if (index < 0)
-		index = buffer->size;
-	if ((size_t)index > buffer->size)
-		return (false);
+		index = buffer->count;
+
+	if ((size_t)index >= buffer->count)
+		return (NULL);
 
 	if (index == 0)
 	{
@@ -90,52 +104,59 @@ bool		buffer_line_insert(t_Buffer *buffer, t_Line *line, ssize_t index)
 		if (buffer->line)
 			buffer->line->prev = line;
 		buffer->line = line;
-		buffer->size++;
+		buffer->count++;
 		return (true);
 	}
-	_i = 0;
-	_tmp = buffer->line;
-	while (_tmp && _i < index - 1)
-	{
-		_tmp = _tmp->next;
-		_i++;
-	}
-	TEST_NULL(_tmp, false);
+
+	t_Line	*_tmp = buffer_get_line(buffer, index);
+	RETURN_IF_NULL(_tmp, false);
+
 	line->next = _tmp->next;
 	line->prev = _tmp;
 	if (_tmp->next)
 		_tmp->next->prev = line;
 	_tmp->next = line;
-	buffer->size++;
+	buffer->count++;
+
 	return (true);
 }
 
 t_Line		*buffer_line_split(t_Buffer *buffer, t_Line *line, size_t index)
 {
-	t_Line	*_new_line;
-	t_Line	*_tmp;
-	size_t	_size;
+	RETURN_IF_NULL(buffer, NULL);
+	RETURN_IF_NULL(line, NULL);
 
-	TEST_NULL(buffer, false);
-	TEST_NULL(line, false);
 	if (index > line->size)
 		return (NULL);
 
-	_new_line = line_create();
-	TEST_NULL(_new_line, false);
-	_size = line->size - index;
-	if (false == line_insert_data(_new_line, 0, _size, line->data + index))
-		return (buffer_line_destroy(buffer, _new_line), NULL);
-	if (false == line_delete_data(line, index, _size))
-		return (buffer_line_destroy(buffer, _new_line), NULL);
-	_tmp = line->next;
+	t_Line	*_new_line = line_create();
+	RETURN_IF_NULL(_new_line, NULL);
+
+	size_t	_size = line->size - index;
+
+	GOTO_IF_FALSE(
+		line_insert_data(_new_line, 0, _size, line->data + index),
+		exit_destroy_line
+	);
+
+	GOTO_IF_FALSE(
+		line_delete_data(line, index, _size),
+		exit_destroy_line
+	);
+
+	t_Line	*_tmp = line->next;
 	_new_line->prev = line;
 	_new_line->next = _tmp;
 	if (_tmp)
 		_tmp->prev = _new_line;
 	line->next = _new_line;
-	buffer->size++;
+	buffer->count++;
+
 	return (_new_line);
+
+	/* GOTO EXIT */
+	exit_destroy_line:
+		return (buffer_line_destroy(buffer, _new_line), NULL);
 }
 
 t_Line		*buffer_line_join(t_Buffer *buffer, t_Line *dst, t_Line *src)
@@ -145,28 +166,6 @@ t_Line		*buffer_line_join(t_Buffer *buffer, t_Line *dst, t_Line *src)
 	TEST_ERROR_FN(line_insert_data(dst, dst->size, src->size, src->data), NULL);
 	buffer_line_destroy(buffer, src);
 	return (dst);
-}
-
-t_Line		*buffer_get_line(t_Buffer *buffer, ssize_t index)
-{
-	t_Line	*_tmp;
-	ssize_t	_i;
-
-	TEST_NULL(buffer, NULL);
-
-	if (index < 0)
-		index = buffer->size - 1;
-	if ((size_t)index >= buffer->size)
-		return (NULL);
-
-	_tmp = buffer->line;
-	_i = 0;
-	while (_tmp && _i < index)
-	{
-		_tmp = _tmp->next;
-		_i++;
-	}
-	return (_tmp);
 }
 
 // +===----- DATA -----===+ //
