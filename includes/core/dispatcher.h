@@ -1,11 +1,11 @@
 /**
- * @file dispatcher.h
+ * @file "core/dispatcher.h"
  * 
  * @brief Dispatcher system, the backbone of the control system.
  * 	Manages customer order redirects.
  * 	Under the direct supervision of the manager.
  * 
- * @ingroup core
+ * @ingroup "core"
 */
 
 #ifndef SEED_DISPATCHER_H

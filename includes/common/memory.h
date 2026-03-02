@@ -1,10 +1,10 @@
 /**
- * @file memory.h
+ * @file "common/memory.h"
  * 
  * @brief Memory helper used across seed-core.
  * 	Provides allocation helpers.
  * 
- * @ingroup common
+ * @ingroup "common"
 */
 
 #ifndef SEED_COMMON_MEMORY_H

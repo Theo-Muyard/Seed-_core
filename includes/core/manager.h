@@ -1,10 +1,10 @@
 /**
- * @file manager.h
+ * @file "core/manager.h"
  * 
  * @brief The seed-core manager, all customer interactions
  * 	 go through the manager. 
  * 
- * @ingroup core
+ * @ingroup "core"
 */
 
 #ifndef SEED_MANAGER_H

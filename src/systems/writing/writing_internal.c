@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "systems/writing/_internal.h"
+#include "systems/writing/writing_internal.h"
 
 #define DATA_ALLOC 256
 

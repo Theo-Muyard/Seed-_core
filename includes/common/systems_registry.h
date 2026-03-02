@@ -1,10 +1,10 @@
 /**
- * @file systems_registry.h
+ * @file "common/systems_registry.h"
  * 
  * @brief Systems helper used across seed-core.
  * 	Provides systems helpers.
  * 
- * @ingroup common
+ * @ingroup "common"
 */
 
 #ifndef SEED_COMMON_SYSTEMS_REGISTRY_H

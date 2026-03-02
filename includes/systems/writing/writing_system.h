@@ -1,20 +1,25 @@
+/**
+ * @file "systems/writing/writing_system.h"
+ * 
+ * @brief The main of the writing system. He registers these
+ * 		commands with the dispatcher and manage the system
+ * 		(initialization / cleanup)
+ * 
+ * @ingroup "writing system"
+*/
+
 #ifndef SEED_WRITING_SYSTEM_H
 # define SEED_WRITING_SYSTEM_H
 
-# include "dependency.h"
-# include "core/dispatcher.h"
-
-// +===----- Types -----===+ //
-
-typedef struct s_Manager		t_Manager;
-typedef struct s_Buffer			t_Buffer;
+# include "core/manager.h"
+# include "systems/writing/writing_internal.h"
 
 /* The writing context of the seed core */
 typedef struct s_WritingCtx
 {
-	t_Buffer	**buffers;	/* All buffers in the writing context */
-	size_t		count;	/* The count of buffers */
-	size_t		capacity;	/* The capacity of buffers */
+	t_Buffer	**buffers;	/* Buffers in the writing context */
+	size_t		count;	/* Buffers count */
+	size_t		capacity;	/* Buffers capacity */
 }	t_WritingCtx;
 
 // +===----- Commands -----===+ //
@@ -27,14 +32,18 @@ extern const t_CommandEntry	writing_commands[];
 
 /**
  * @brief Initialize the writing system.
- * @param manager The seed core manager.
- * @return TRUE for success or FALSE if an error occured.
+ * 
+ * @param manager The manager must not be NULL.
+ * 
+ * @retval TRUE for success.
+ * @retval FALSE if `manager` is NULL or an error occurred.
 */
 bool	writing_init(t_Manager	*manager);
 
 /**
- * @brief Clean the writing system.
- * @param ctx The writing context.
+ * @brief Clean the writing context.
+ * 
+ * @param ctx The writing context must not be NULL.
 */
 void	writing_clean(t_WritingCtx *ctx);
 
