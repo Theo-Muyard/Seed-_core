@@ -1,9 +1,9 @@
 #include "dependency.h"
-#include "tools/memory.h"
+#include "common/memory.h"
 
 char	*ft_strdup(const char *str)
 {
-	int	_i;
+	int		_i;
 	char	*ptr;
 
 	TEST_NULL(str, NULL);

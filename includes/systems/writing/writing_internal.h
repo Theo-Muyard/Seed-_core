@@ -140,7 +140,10 @@ t_Line		*buffer_line_join(t_Buffer *buffer, t_Line *dst, t_Line *src);
  * @retval TRUE for success.
  * @retval FALSE if `line` is NULL or an error occurred.
 */
-bool		line_insert_data(t_Line *line, ssize_t column, size_t size, const char *data);
+bool		line_insert_data(
+	t_Line *line, ssize_t column,
+	size_t size, const char *data
+);
 
 /**
  * @brief Delete the data to the line.
