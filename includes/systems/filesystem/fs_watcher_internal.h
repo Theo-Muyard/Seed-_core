@@ -171,8 +171,10 @@ bool		flush_pending(t_WatchCtx *ctx);
  * @param event The event must not be NULL.
  * @param path The path must not be NULL.
  * 
- * @retval TRUE for success.
- * @retval FALSE if `ctx`, `event` or `path` is NULL or an error occurred.
+ * @retval A newly allocated event.
+ * @retval NULL if `ctx`, `event` or `path` is NULL or an error occurred.
+ * 
+ * @warning Caller must free returned pointer with `free()`.
 */
 t_FsEvent	*handle_event
 (

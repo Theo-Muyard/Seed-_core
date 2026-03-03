@@ -26,7 +26,7 @@ bool		os_dir_create(const char *path, unsigned int mode);
 
 /**
  * @brief Delete a folder in the OS filesystem.
- * `
+ * 
  * @param path The path must not be NULL.
  * 
  * @retval TRUE for success.

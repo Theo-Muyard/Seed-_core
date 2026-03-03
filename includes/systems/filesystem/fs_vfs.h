@@ -201,8 +201,9 @@ bool		vfs_file_rename(t_File *file, const char *filename);
  * @param dir The directory must not be NULL.
  * @param file The file must not be NULL.
  * 
- * @retval TRUE for success.
- * @retval FALSE if `dir` or `file` is NULL or an error occurred.
+ * @retval TRUE if the file is in folder.
+ * @retval FALSE if `dir` or `file` is NULL, if the file is not in folder 
+ * 		or an error occurred.
 */
 bool		vfs_file_is_in_dir(t_Directory *dir, t_File *file);
 
@@ -272,8 +273,9 @@ bool		vfs_subdir_move(t_Directory *dst, t_Directory *src, t_Directory *subdir);
  * @param dir The directory must not be NULL.
  * @param subdir The sub folder must not be NULL.
  * 
- * @retval TRUE for success.
- * @retval FALSE if `dir` or `subdir` is NULL or an error occurred.
+ * @retval TRUE if the sub folder is in folder.
+ * @retval FALSE if `dir` or `subdir` is NULL, if the sub folder is not in folder 
+ * 		or an error occurred.
 */
 bool		vfs_subdir_is_in_dir(t_Directory *dir, t_Directory *subdir);
 
