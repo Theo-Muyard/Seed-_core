@@ -174,7 +174,7 @@ t_Line		*buffer_line_join(t_Buffer *buffer, t_Line *dst, t_Line *src)
 	return (dst);
 }
 
-// +===----- DATA -----===+ //
+// +===----- Data functions -----===+ //
 
 bool		line_insert_data(t_Line *line, ssize_t index, size_t size, const char *data)
 {

@@ -1,5 +1,11 @@
-#ifndef SEED_FILESYSTEM_INTERNAL_H
-# define SEED_FILESYSTEM_INTERNAL_H
+/**
+ * @file "systems/filesystem/fs_vfs.h"
+ * 
+ * @brief Managing virtual files systems.
+*/
+
+#ifndef SEED_FILESYSTEM_VFS_H
+# define SEED_FILESYSTEM_VFS_H
 
 # include "dependency.h"
 
@@ -25,90 +31,122 @@ typedef struct	s_Directory
 	size_t				files_count;	/* The files count */
 	size_t				files_capacity;	/* The file capacity */
 
-	struct s_Directory	**subdir;	/* The subdir his contains */
-	size_t				subdir_count;	/* The subdir count */
-	size_t				subdir_capacity;	/* The subdir capacity */
+	struct s_Directory	**subdirs;	/* The subdir his contains */
+	size_t				subdirs_count;	/* The subdir count */
+	size_t				subdirs_capacity;	/* The subdir capacity */
 }	t_Directory;
 
-// +===----- Path -----===+ //
+// +===----- Resolving functions -----===+ //
 
 /**
- * @brief Join two paths.
- * @param base The base path.
- * @param path The path that will be added to the end of the base.
- * @return The joined allocated path.
+ * @brief Retrieve the relative path of the folder,
+ * 		relative to the root.
+ * 
+ * @param dir The folder must not be NULL.
+ * 
+ * @retval The newly allocated relative path.
+ * @retval NULL if `dir` is NULL, if allocation fails or
+ * 		an error occurred.
+ * 
+ * @warning Caller must free returned pointer with `free()`.
 */
-char		*join_path(const char *base, const char *path);
+char		*vfs_get_dir_relative_path(const t_Directory *dir);
 
 /**
- * @brief Get the relative path of a dir.
- * @param dir The dir to find his relative path.
- * @return The relative path.
+ * @brief Retrieve the relative path of the file,
+ * 		relative to the root.
+ * 
+ * @param file The file must not be NULL.
+ * 
+ * @retval The newly allocated relative path.
+ * @retval NULL if `file` is NULL, if allocation fails or
+ * 		an error occurred.
+ * 
+ * @warning Caller must free returned pointer with `free()`.
 */
-char		*directory_get_relative_path(const t_Directory *dir);
+char		*vfs_get_file_relative_path(const t_File *file);
 
-/**
- * @brief Get the relative path of a file.
- * @param file The file to find his relative path.
- * @return The relative path.
-*/
-char		*file_get_relative_path(const t_File *file);
-
-// +===----- Directory -----===+ //
+// +===----- Directory functions -----===+ //
 
 /**
  * @brief Creates a new empty directory.
- * @param parent The parent directory.
- * @param dirname The name of the directory that will be created.
- * @return The directory that has just been created.
+ * 
+ * @param parent The parent can be NULL.
+ * @param dirname The dirname must not be NULL.
+ * 
+ * @retval The newly allocated directory.
+ * @retval NULL if `dirname` is NULL, if allocation fails or
+ * 		an error occurred.
+ * 
+ * @warning Caller must free returned pointer with `vfs_directory_destroy()`.
 */
-t_Directory	*directory_create(t_Directory *parent, const char *dirname);
+t_Directory	*vfs_directory_create(t_Directory *parent, const char *dirname);
 
 /**
- * @brief Destroys the given directory.
- * @param dir The directory that will be destroyed.
+ * @brief Destroys the directory.
+ * 
+ * @param dir The directory must not be NULL.
 */
-void		directory_destroy(t_Directory *dir);
+void		vfs_directory_destroy(t_Directory *dir);
 
-// +===----- Files -----===+ //
+// +===----- File functions -----===+ //
 
 /**
  * @brief Creates a new empty file.
- * @param parent The parent directory.
- * @param filename The name of the file that will be created.
- * @return The file that has just been created.
+ * 
+ * @param parent The parent can be NULL.
+ * @param filename The filename must not be NULL.
+ * 
+ * @retval The newly allocated file.
+ * @retval NULL if `filename` is NULL, if allocation fails or
+ * 		an error occurred.
+ * 
+ * @warning Caller must free returned pointer with `vfs_file_destroy()`.
 */
-t_File		*file_create(t_Directory *parent, const char *filename);
+t_File		*vfs_file_create(t_Directory *parent, const char *filename);
 
 /**
- * @brief Destroys the given file.
- * @param file The file that will be destroyed.
+ * @brief Destroys the file.
+ * 
+ * @param file The file must not be NULL.
 */
-void		file_destroy(t_File *file);
+void		vfs_file_destroy(t_File *file);
 
 /**
- * @brief Add the given file to the directory.
- * @param dir The directory that contains files.
- * @param file The file that will be added. 
- * @return TRUE for success or FALSE if an error occured.
+ * @brief Add the file to the folder.
+ * 
+ * @param dir The directory must not be NULL.
+ * @param file The file must not be NULL.
+ * 
+ * @retval TRUE for success.
+ * @retval FALSE if `dir` or `file` is NULL or an error occurred.
 */
-bool		directory_file_add(t_Directory *dir, t_File *file);
+bool		vfs_add_file_to_dir(t_Directory *dir, t_File *file);
 
 /**
- * @brief Remove the given file.
- * @param dir The directory that contains files.
- * @param file The file that will be removed.
- * @return TRUE for success or FALSE if an error occured.
+ * @brief Remove the file to the folder.
+ * 
+ * @param dir The directory must not be NULL.
+ * @param file The file must not be NULL.
+ * 
+ * @retval TRUE for success.
+ * @retval FALSE if `dir` or `file` is NULL or an error occurred.
 */
-bool		directory_file_remove(t_Directory *dir, t_File *file);
+bool		vfs_remove_file_to_dir(t_Directory *dir, t_File *file);
 
 /**
- * @brief Find a file by its name in the given directory.
- * @param parent The parent directory of the file that contains files and sub directory.
- * @param filename The name of the file.
- * @return The file or NULL if not found.
+ * @brief Search for a file by its filename ONLY in its parent directory.
+ * 
+ * @param parent The parent must not be NULL.
+ * @param filename The filename must not be NULL.
+ * 
+ * @retval The file.
+ * @retval NULL if `parent` or `filename` is NULL, if the file was not found
+ * 		or an error occurred.
 */
-t_File		*directory_find_file(t_Directory *parent, const char *filename);
+t_File		*vfs_find_file(t_Directory *parent, const char *filename);
+
+// TODO: Continuer a partir d'ici
 
 /**
  * @brief Resolve a relative path.
