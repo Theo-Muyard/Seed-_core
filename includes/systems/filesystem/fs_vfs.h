@@ -99,7 +99,8 @@ void		vfs_dir_destroy(t_Directory *dir);
  * @param dirname The dirname must not be NULL.
  * 
  * @retval TRUE for success.
- * @retval FALSE if `dir` or `dirname` is NULL or an error occurred.
+ * @retval FALSE if `dir` or `dirname` is NULL, if the dirname
+ * 	is same as the current one or an error occurred.
 */
 bool		vfs_dir_rename(t_Directory *dir, const char *dirname);
 
@@ -117,7 +118,7 @@ bool		vfs_dir_rename(t_Directory *dir, const char *dirname);
  * 
  * @warning Caller must free returned pointer with `vfs_file_destroy()`.
 */
-t_File		*vfs_file_create(t_Directory *parent, const char *filename);
+t_File	*vfs_file_create(t_Directory *parent, const char *filename);
 
 /**
  * @brief Destroys the file.
@@ -158,7 +159,7 @@ bool		vfs_remove_file_to_dir(t_Directory *dir, t_File *file);
  * @retval NULL if `parent` or `filename` is NULL, if the file was not found
  * 		or an error occurred.
 */
-t_File		*vfs_file_find(t_Directory *parent, const char *filename);
+t_File	*vfs_file_find(t_Directory *parent, const char *filename);
 
 /**
  * @brief Resolves a relative file path.
@@ -170,7 +171,7 @@ t_File		*vfs_file_find(t_Directory *parent, const char *filename);
  * @retval NULL if `root` or `path` is NULL, if the file was not found
  * 		or an error occurred.
 */
-t_File		*vfs_file_resolve(t_Directory *root, const char *path);
+t_File	*vfs_file_resolve(t_Directory *root, const char *path);
 
 /**
  * @brief Move a file from the source folder to the destination folder.

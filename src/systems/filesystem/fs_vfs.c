@@ -64,27 +64,19 @@ char		*vfs_get_file_relative_path(const t_File *file)
 
 // +===----- Directory functions -----===+ //
 
-// TODO: Reformat functions
-
-t_Directory	*directory_create(t_Directory *parent, const char *dirname)
+t_Directory	*vfs_dir_create(t_Directory *parent, const char *dirname)
 {
-	t_Directory	*dir;
+	RETURN_IF_NULL(dirname, NULL);
 
-	TEST_NULL(dirname, NULL);
-	dir = malloc(sizeof(t_Directory));
-	TEST_NULL(dir, NULL);
+	t_Directory	*dir = malloc(sizeof(t_Directory));
+	RETURN_IF_NULL(dir, NULL);
+
 	dir->dirname = ft_strdup(dirname);
-	if (NULL == dir->dirname)
-		return (free(dir), NULL);
-	if (NULL != parent)
-	{
-		TEST_ERROR_FN(
-			directory_subdir_add(parent, dir),
-			NULL
-		);
-	}
-	dir->parent = parent;
+	GOTO_IF_NULL(dir->dirname, exit_free_dir);
 
+	vfs_add_subdir_to_dir(parent, dir);
+	dir->parent = parent;
+	
 	dir->files = NULL;
 	dir->files_count = 0;
 	dir->files_capacity = 0;
@@ -92,256 +84,277 @@ t_Directory	*directory_create(t_Directory *parent, const char *dirname)
 	dir->subdirs = NULL;
 	dir->subdirs_count = 0;
 	dir->subdirs_capacity = 0;
+
 	return (dir);
+
+	/* GOTO EXIT */
+	exit_free_dir:
+		return (free(dir), NULL);
 }
 
-void		directory_destroy(t_Directory *dir)
+void		vfs_dir_destroy(t_Directory *dir)
 {
-	size_t	_i;
-
 	if (NULL == dir)
 		return ;
-	_i = 0;
-	while (_i < dir->files_count)
-	{
-		file_destroy(dir->files[_i]);
-		_i++;
-	}
-	_i = 0;
-	while (_i < dir->subdirs_count)
-	{
-		directory_destroy(dir->subdirs[_i]);
-		_i++;
-	}
-	free(dir->files);
-	free(dir->subdirs);
+
+	for (size_t _i = 0; _i < dir->files_count; _i++)
+		vfs_file_destroy(dir->files[_i]);	
+	
+	for (size_t _i = 0; _i < dir->subdirs_count; _i++)
+		vfs_dir_destroy(dir->subdirs[_i]);	
+
 	free(dir->dirname);
+	dir->dirname = NULL;
+	free(dir->files);
+	dir->files = NULL;
+	free(dir->subdirs);
+	dir->subdirs = NULL;
 	free(dir);
 }
 
-// +===----- Files -----===+ //
-
-t_File		*file_create(t_Directory *parent, const char *filename)
+bool		vfs_dir_rename(t_Directory *dir, const char *dirname)
 {
-	t_File	*file;
+	RETURN_IF_NULL(dir, false);
+	RETURN_IF_NULL(dirname, false);
 
-	TEST_NULL(filename, NULL);
-	file = malloc(sizeof(t_File));
-	TEST_NULL(file, NULL);
+	if (strcmp(dirname, dir->dirname) == 0)
+		return (false);
+
+	char	*_new_dirname = ft_strdup(dirname);
+	RETURN_IF_NULL(_new_dirname, false);
+
+	free(dir->dirname);
+	dir->dirname = _new_dirname;
+
+	return (true);
+}
+
+// +===----- File functions-----===+ //
+
+t_File	*vfs_file_create(t_Directory *parent, const char *filename)
+{
+	RETURN_IF_NULL(filename, NULL);
+
+	t_File	*file = malloc(sizeof(t_File));
+	RETURN_IF_NULL(file, NULL);
+
 	file->filename = ft_strdup(filename);
-	if (NULL == file->filename)
-		return (free(file), NULL);
-	if (NULL != parent)
-	{
-		TEST_ERROR_FN(
-			directory_file_add(parent, file),
-			NULL
-		);
-	}
+	file->parent = NULL;
+	GOTO_IF_NULL(file->filename, exit_free_file);
+
+	vfs_add_file_to_dir(parent, file);
+
 	return (file);
+
+	/* GOTO EXIT */
+	exit_free_file:
+		return (free(file), NULL);
 }
 
 void		file_destroy(t_File *file)
 {
 	if (NULL == file)
 		return ;
+
 	free(file->filename);
 	free(file);
 }
 
-bool		directory_file_add(t_Directory *dir, t_File *file)
+bool		vfs_add_file_to_dir(t_Directory *dir, t_File *file)
 {
-	t_File	**_tmp;
+	RETURN_IF_NULL(dir, NULL);
+	RETURN_IF_NULL(file, NULL);
 
-	TEST_NULL(dir, false);
-	TEST_NULL(file, false);
 	if (dir->files_capacity == 0)
 	{
 		dir->files = malloc(FILE_ALLOC * sizeof(t_File *));
-		TEST_NULL(dir->files, false);
+		RETURN_IF_NULL(dir->files, false);
+
 		dir->files_capacity = FILE_ALLOC;
 	}
+
 	if (dir->files_count >= dir->files_capacity)
 	{
-		_tmp = realloc(
+		t_File	**_tmp = realloc(
 			dir->files,
-			FILE_ALLOC + dir->files_capacity * sizeof(t_File *)
+			(FILE_ALLOC + dir->files_capacity) * sizeof(t_File *)
 		);
-		TEST_NULL(_tmp, false);
+		RETURN_IF_NULL(_tmp, false);
+
 		dir->files = _tmp;
 		dir->files_capacity += FILE_ALLOC;
 	}
+
+	file->parent = dir;
 	dir->files[dir->files_count] = file;
 	dir->files_count++;
-	file->parent = dir;
+
 	return (true);
 }
 
-bool		directory_file_remove(t_Directory *dir, t_File *file)
+bool		vfs_remove_file_to_dir(t_Directory *dir, t_File *file)
 {
-	size_t	_i;
+	RETURN_IF_NULL(dir, NULL);
+	RETURN_IF_NULL(file, NULL);
 
-	TEST_NULL(dir, false);
-	TEST_NULL(file, false);
-
-	_i = 0;
+	size_t	_i = 0;
 	while (_i < dir->files_count)
 	{
 		if (dir->files[_i] == file)
 		{
-			dir->files[_i] = NULL;
 			memmove(
 				dir->files + _i,
 				dir->files + _i + 1,
 				(dir->files_count - _i - 1) * sizeof(t_File *)
 			);
+			dir->files[_i] = NULL;
 			dir->files_count--;
 			file->parent = NULL;
 			return (true);
 		}
 		_i++;
 	}
+
 	return (false);
 }
 
-t_File	*directory_find_file(t_Directory *parent, const char *filename)
+t_File	*vfs_file_find(t_Directory *parent, const char *filename)
 {
-	size_t	_i;
+	RETURN_IF_NULL(parent, NULL);
+	RETURN_IF_NULL(filename, NULL);
 
-	TEST_NULL(parent, NULL);
-	TEST_NULL(filename, NULL);
-
-	_i = 0;
+	size_t	_i = 0;
 	while (_i < parent->files_count)
 	{
 		if (strcmp(filename, parent->files[_i]->filename) == 0)
 			return (parent->files[_i]);
 		_i++;
 	}
+
 	return (NULL);
 }
 
-t_File	*file_resolve(t_Directory *root, const char *path)
+t_File	*vfs_file_resolve(t_Directory *root, const char *path)
 {
-	t_Directory	*_dir;
-	t_File		*file;
-	char		*_slash;
-	char		*_cpy;
+	RETURN_IF_NULL(root, NULL);
+	RETURN_IF_NULL(path, NULL);
 
-	TEST_NULL(root, NULL);
-	TEST_NULL(path, NULL);
+	char	*_cpy = ft_strdup(path);
+	RETURN_IF_NULL(_cpy, NULL);
 
-	_cpy = ft_strdup(path);
-	TEST_NULL(_cpy, NULL);
-
-	_slash = strrchr(_cpy, '/');
+	char	*_slash = strrchr(_cpy, '/');
 	if (NULL == _slash)
 	{
-		file = directory_find_file(root, _cpy);
-		free(_cpy);
-		return (file);
+		t_File	*file = vfs_file_find(root, _cpy);
+		return (free(_cpy), file);
 	}
+
 	*_slash = '\0';
-	_dir = directory_resolve(root, _cpy);
-	if (NULL == _dir)
-		return (free(_cpy), NULL);
-	file = directory_find_file(_dir, _slash + 1);
+	t_Directory	*_dir = vfs_subdir_resolve(root, _cpy);
+	GOTO_IF_NULL(_dir, exit_free_cpy);
+
+	t_File	*file = vfs_file_find(_dir, _slash + 1);
 	free(_cpy);
+
 	return (file);
+
+	/* GOTO EXIT */
+	exit_free_cpy:
+		return (free(_cpy), NULL);
 }
 
-bool		directory_file_move(t_Directory *dst, t_Directory *src, t_File *file)
+bool		vfs_file_move(t_Directory *dst, t_Directory *src, t_File *file)
 {
-	TEST_NULL(dst, false);
-	TEST_NULL(src, false);
-	TEST_NULL(file, false);
-	TEST_ERROR_FN(directory_file_remove(src, file), false);
-	TEST_ERROR_FN(directory_file_add(dst, file), false);
+	RETURN_IF_NULL(dst, false);
+	RETURN_IF_NULL(src, false);
+	RETURN_IF_NULL(file, false);
+
+	RETURN_IF_FALSE(vfs_remove_file_to_dir(src, file), false);
+	RETURN_IF_FALSE(vfs_add_file_to_dir(src, file), false);
+
 	return (true);
 }
 
-bool		directory_file_rename(t_File *file, const char *filename)
+bool		vfs_file_rename(t_File *file, const char *filename)
 {
-	char	*_old_filename;
-	char	*_new_filename;
+	RETURN_IF_NULL(file, false);
+	RETURN_IF_NULL(filename, false);
 
-	TEST_NULL(file, false);
-	TEST_NULL(filename, false);
 	if (strcmp(filename, file->filename) == 0)
-		return (true);
-	_old_filename = file->filename;
-	_new_filename = ft_strdup(filename);
-	TEST_NULL(_new_filename, false);
-	free(_old_filename);
+		return (false);
+
+	char	*_new_filename = ft_strdup(filename);
+	RETURN_IF_NULL(_new_filename, false);
+
+	free(file->filename);
 	file->filename = _new_filename;
+
 	return (true);
 }
 
-bool		directory_contains_file(t_Directory *dir, t_File *file)
+bool		vfs_file_is_in_dir(t_Directory *dir, t_File *file)
 {
-	size_t	_i;
-
 	TEST_NULL(dir, NULL);
 	TEST_NULL(file, NULL);
 
-	_i = 0;
+	size_t	_i = 0;
 	while (_i < dir->files_count)
 	{
 		if (dir->files[_i] == file)
 			return (true);
 		_i++;
 	}
+
 	return (false);
 }
 
-// +===----- Sub directory -----===+ //
+// +===----- Subdir functions -----===+ //
 
-bool		directory_subdir_add(t_Directory *dir, t_Directory *subdir)
+bool		vfs_add_subdir_to_dir(t_Directory *dir, t_Directory *subdir)
 {
-	t_Directory	**_tmp;
-
-	TEST_NULL(dir, false);
-	TEST_NULL(subdir, false);
 	if (dir->subdirs_capacity == 0)
 	{
 		dir->subdirs = malloc(DIR_ALLOC * sizeof(t_Directory *));
-		TEST_NULL(dir->subdirs, false);
+		RETURN_IF_NULL(dir->subdirs, false);
+
 		dir->subdirs_capacity = DIR_ALLOC;
 	}
+
 	if (dir->subdirs_count >= dir->subdirs_capacity)
 	{
-		_tmp = realloc(
+		t_Directory	**_tmp = realloc(
 			dir->subdirs,
-			DIR_ALLOC + dir->subdirs_capacity * sizeof(t_Directory *)
+			(DIR_ALLOC + dir->subdirs_capacity) * sizeof(t_Directory *)
 		);
-		TEST_NULL(_tmp, false);
+		RETURN_IF_NULL(_tmp, false);
+		
 		dir->subdirs = _tmp;
 		dir->subdirs_capacity += DIR_ALLOC;
 	}
+
+	subdir->parent = dir;
 	dir->subdirs[dir->subdirs_count] = subdir;
 	dir->subdirs_count++;
-	subdir->parent = dir;
+
 	return (true);
 }
 
-bool		directory_subdir_remove(t_Directory *dir, t_Directory *subdir)
+bool		vfs_remove_subdir_to_dir(t_Directory *dir, t_Directory *subdir)
 {
-	size_t	_i;
+	RETURN_IF_NULL(dir, NULL);
+	RETURN_IF_NULL(subdir, NULL);
 
-	TEST_NULL(dir, false);
-	TEST_NULL(subdir, false);
-
-	_i = 0;
+	size_t	_i = 0;
 	while (_i < dir->subdirs_count)
 	{
 		if (dir->subdirs[_i] == subdir)
 		{
-			dir->subdirs[_i] = NULL;
 			memmove(
 				dir->subdirs + _i,
 				dir->subdirs + _i + 1,
 				(dir->subdirs_count - _i - 1) * sizeof(t_Directory *)
 			);
+			dir->subdirs[_i] = NULL;
 			dir->subdirs_count--;
 			subdir->parent = NULL;
 			return (true);
@@ -353,34 +366,30 @@ bool		directory_subdir_remove(t_Directory *dir, t_Directory *subdir)
 
 t_Directory	*directory_find_subdir(t_Directory *parent, const char *dirname)
 {
-	size_t	_i;
+	RETURN_IF_NULL(parent, NULL);
+	RETURN_IF_NULL(dirname, NULL);
 
-	TEST_NULL(parent, NULL);
-	TEST_NULL(dirname, NULL);
-
-	_i = 0;
+	size_t	_i = 0;
 	while (_i < parent->subdirs_count)
 	{
 		if (strcmp(dirname, parent->subdirs[_i]->dirname) == 0)
 			return (parent->subdirs[_i]);
 		_i++;
 	}
+
 	return (NULL);
 }
 
 t_Directory	*directory_resolve(t_Directory *root, const char *path)
 {
-	t_Directory	*current;
-	char		**_tokens;
-	size_t		_i;
+	RETURN_IF_NULL(root, NULL);
+	RETURN_IF_NULL(path, NULL);
 
-	TEST_NULL(root, NULL);
-	TEST_NULL(path, NULL);
-	
-	_tokens = ft_split(path, '/');
-	TEST_NULL(_tokens, NULL);
-	_i = 0;
-	current = root;
+	char	**_tokens = ft_split(path, '/');
+	RETURN_IF_NULL(_tokens, NULL);
+
+	size_t	_i = 0;
+	t_Directory	*current = root;
 	while (_tokens[_i])
 	{
 		if (strcmp(_tokens[_i], ".") == 0)
@@ -390,59 +399,48 @@ t_Directory	*directory_resolve(t_Directory *root, const char *path)
 		}
 		else if (strcmp(_tokens[_i], "..") == 0)
 		{
-			current = current->parent;
+			current = current->parent ? current->parent : current;
 			_i++;
 			continue;
 		}
+
 		current = directory_find_subdir(current, _tokens[_i]);
-		if (NULL == current)
-			return (ft_free_split(_tokens), NULL);
+		GOTO_IF_NULL(current, exit_free_tokens);
 		_i++;
 	}
+
 	ft_free_split(_tokens);
 	return (current);
+
+	/* GOTO EXIT */
+	exit_free_tokens:
+		return (ft_free_split(_tokens), NULL);
 }
 
 bool		directory_subdir_move(t_Directory *dst, t_Directory *src, t_Directory *subdir)
 {
-	TEST_NULL(dst, false);
-	TEST_NULL(src, false);
-	TEST_NULL(subdir, false);
-	TEST_ERROR_FN(directory_subdir_remove(src, subdir), false);
-	TEST_ERROR_FN(directory_subdir_add(dst, subdir), false);
-	return (true);
-}
+	RETURN_IF_NULL(dst, false);
+	RETURN_IF_NULL(src, false);
+	RETURN_IF_NULL(subdir, false);
 
-bool		directory_subdir_rename(t_Directory *dir, const char *dirname)
-{
-	char	*_old_dirname;
-	char	*_new_dirname;
+	RETURN_IF_FALSE(vfs_remove_subdir_to_dir(src, subdir), false);
+	RETURN_IF_FALSE(vfs_add_subdir_to_dir(src, subdir), false);
 
-	TEST_NULL(dir, false);
-	TEST_NULL(dirname, false);
-	if (strcmp(dirname, dir->dirname) == 0)
-		return (true);
-	_old_dirname = dir->dirname;
-	_new_dirname = ft_strdup(dirname);
-	TEST_NULL(_new_dirname, false);
-	free(_old_dirname);
-	dir->dirname = _new_dirname;
 	return (true);
 }
 
 bool		directory_contains_subdir(t_Directory *dir, t_Directory *subdir)
 {
-	size_t	_i;
+	RETURN_IF_NULL(dir, false);
+	RETURN_IF_NULL(subdir, false);
 
-	TEST_NULL(dir, NULL);
-	TEST_NULL(subdir, NULL);
-
-	_i = 0;
+	size_t	_i = 0;
 	while (_i < dir->subdirs_count)
 	{
 		if (dir->subdirs[_i] == subdir)
 			return (true);
 		_i++;
 	}
+
 	return (false);
 }
