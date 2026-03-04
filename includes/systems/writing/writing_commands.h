@@ -14,6 +14,8 @@
 # include "seed.h"
 # include "core/manager.h"
 
+# define BUFFER_ALLOC 32
+
 // +===----- Buffer functions -----===+ //
 
 /**

@@ -1,24 +1,23 @@
-#include "core/dispatcher.h"
-#include "systems/writing/_internal.h"
-#include "systems/writing/commands.h"
-#include "systems/writing/system.h"
+#include "systems/writing/writing_commands.h"
 
-#define BUFFER_ALLOC 32
+// +===----- Static functions -----===+ //
 
 /**
- * @brief Converts the index given to the actual index of the first byte of the character.
- * @param str The data content.
- * @param index The index of the character.
- * @return The real index to the first byte of the character. 
-*/
-static size_t	utf_char_to_byte(const char *str, size_t index)
+ * @brief Converts a UTF-8 character index to a byte offset.
+ *
+ * @param str The string must not be NULL.
+ * @param index The codepoint index.
+ *
+ * @retval Byte offset of the requested character.
+ * @retval -1 if `str` is NULL or an error occurred.
+ */
+static size_t utf8_codepoint_to_byte_offset(const char *str, size_t index)
 {
-	size_t	_i;
-	size_t	_count;
+	RETURN_IF_NULL(str, -1);
 
-	TEST_NULL(str, 0);
-	_i = 0;
-	_count = 0;
+	size_t	_i = 0;
+	size_t	_count = 0;
+
 	while (str[_i])
 	{
 		if ((str[_i] & 0xC0) != 0x80)
@@ -29,235 +28,245 @@ static size_t	utf_char_to_byte(const char *str, size_t index)
 		}
 		_i++;
 	}
-	return (_i);
+	return (-1);
 }
 
-// +===----- Buffer -----===+ //
-
 /**
- * @brief Manage the capacity of the writing context.
- * @param ctx The context of the system.
- * @param id The id of the buffer.
- * @return TRUE for success or FALSE if an error occured.
-*/
-static t_ErrorCode	manage_capacity(t_WritingCtx *ctx, size_t id)
+ * @brief Manage the specified buffer capacity allocation.
+ *
+ * @param ctx The context must not be NULL.
+ * @param count The buffers count.
+ *
+ * @return A specific `ErrorCode`.
+ */
+static t_ErrorCode manage_buffers_capacity(t_WritingCtx *ctx, size_t count)
 {
-	t_Buffer			**_tmp;
-	size_t				_old_cap;
-	size_t				_i;
+	RETURN_IF_NULL(ctx, ERR_OPERATION_FAILED);
 
 	if (NULL == ctx->buffers)
 	{
 		ctx->buffers = malloc(BUFFER_ALLOC * sizeof(t_Buffer *));
-		if (NULL == ctx->buffers)
-			return (ERR_INTERNAL_MEMORY);
+		RETURN_IF_NULL(ctx->buffers, ERR_INTERNAL_MEMORY);
+
 		ctx->capacity = BUFFER_ALLOC;
-		for (_i = 0; _i < ctx->capacity; _i++)
+		for (size_t _i = 0; _i < BUFFER_ALLOC; _i++)
 			ctx->buffers[_i] = NULL;
 	}
-	if (id >= ctx->capacity)
+	if (count >= ctx->capacity)
 	{
-		_old_cap = ctx->capacity;
-		_tmp = realloc(
+		size_t	_old_cap = ctx->capacity;
+		t_Buffer	**_tmp = realloc(
 			ctx->buffers,
 			(ctx->capacity + BUFFER_ALLOC) * sizeof(t_Buffer *)
 		);
-		if (NULL == _tmp)
-			return (ERR_INTERNAL_MEMORY);
+		RETURN_IF_NULL(_tmp, ERR_INTERNAL_MEMORY);
+
 		ctx->buffers = _tmp;
 		ctx->capacity += BUFFER_ALLOC;
-		for (_i = _old_cap; _i < ctx->capacity; _i++)
+		for (size_t _i = _old_cap; _i < ctx->capacity; _i++)
 			ctx->buffers[_i] = NULL;
 	}
 	return (ERR_SUCCESS);
 }
 
-t_ErrorCode	cmd_buffer_create(t_Manager *manager, const t_Command *cmd)
-{
-	t_WritingCtx		*_ctx;
-	t_Buffer			*_buffer;
-	t_CmdCreateBuffer	*_payload;
-	size_t				_i;
+// +===----- Buffer functions -----===+ //
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	_i = 0;
+t_ErrorCode cmd_buffer_create(t_Manager *manager, const t_Command *cmd)
+{
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdCreateBuffer *_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
+
+	size_t	_i = 0;
 	while (_i < _ctx->capacity && _ctx->buffers[_i])
 		_i++;
-	_buffer = buffer_create();
-	if (NULL == _buffer)
-		return (ERR_INTERNAL_MEMORY);
-	if (manage_capacity(_ctx, _i))
-		return (buffer_destroy(_buffer), ERR_INTERNAL_MEMORY);
+
+	t_Buffer	*_buffer = buffer_create();
+	RETURN_IF_NULL(_buffer, ERR_INTERNAL_MEMORY);
+
+	t_ErrorCode	_code = manage_buffers_capacity(_ctx, _i);
+	if (_code)
+		return (buffer_destroy(_buffer), _code);
 
 	_ctx->buffers[_i] = _buffer;
-	_payload->out_buffer_id = _i;
 	_ctx->count++;
+	_payload->out_buffer_id = _i;
+
 	return (ERR_SUCCESS);
 }
 
-t_ErrorCode	cmd_buffer_destroy(t_Manager *manager, const t_Command *cmd)
+t_ErrorCode cmd_buffer_destroy(t_Manager *manager, const t_Command *cmd)
 {
-	t_WritingCtx		*_ctx;
-	t_CmdDestroyBuffer	*_payload;
+	t_WritingCtx 		*_ctx = manager->writing_ctx;
+	t_CmdDestroyBuffer	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
 	if (_payload->buffer_id >= _ctx->capacity)
 		return (ERR_BUFFER_NOT_FOUND);
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	buffer_destroy(_ctx->buffers[_payload->buffer_id]);
+
+	t_Buffer	*_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
+
+	buffer_destroy(_buffer);
 	_ctx->buffers[_payload->buffer_id] = NULL;
 	_ctx->count--;
+
 	return (ERR_SUCCESS);
 }
 
-// +===----- Lines -----===+ //
+// +===----- Line functions -----===+ //
 
-t_ErrorCode	cmd_buffer_line_insert(t_Manager *manager, const t_Command *cmd)
+t_ErrorCode cmd_buffer_line_insert(t_Manager *manager, const t_Command *cmd)
 {
-	t_WritingCtx		*_ctx;
-	t_CmdInsertLine		*_payload;
-	t_Line				*_line;
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdInsertLine	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	if (_payload->line == -1)
-		_payload->line = _ctx->buffers[_payload->buffer_id]->size - 1;
-	if((size_t)_payload->line > _ctx->buffers[_payload->buffer_id]->size)
+	t_Buffer	*_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
+
+	if (_payload->line < -1)
+		_payload->line = _buffer->count - 1;
+
+	if ((size_t)_payload->line > _buffer->count)
 		return (ERR_LINE_NOT_FOUND);
-	_line = line_create();
-	if (NULL == _line)
-		return (ERR_INTERNAL_MEMORY);
-	if (false == buffer_line_insert(
-		_ctx->buffers[_payload->buffer_id],
-		_line,
-		_payload->line
-	))
+
+	t_Line	*_line = line_create();
+	RETURN_IF_NULL(_line, ERR_INTERNAL_MEMORY);
+
+	GOTO_IF_FALSE(buffer_line_insert(_buffer, _line, _payload->line), exit_free_line);
+	return (ERR_SUCCESS);
+
+	/* GOTO EXIT */
+	exit_free_line:
 		return (free(_line), ERR_OPERATION_FAILED);
+}
+
+t_ErrorCode cmd_buffer_line_delete(t_Manager *manager, const t_Command *cmd)
+{
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdDeleteLine	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
+
+	t_Buffer	*_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
+
+	t_Line	*_line = buffer_get_line(_buffer, _payload->line);
+	RETURN_IF_NULL(_line, ERR_LINE_NOT_FOUND);
+
+	buffer_line_destroy(_buffer, _line);
 	return (ERR_SUCCESS);
 }
 
-t_ErrorCode	cmd_buffer_line_delete(t_Manager *manager, const t_Command *cmd)
+t_ErrorCode cmd_buffer_line_split(t_Manager *manager, const t_Command *cmd)
 {
-	t_WritingCtx		*_ctx;
-	t_CmdDeleteLine		*_payload;
-	t_Line				*_line;
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdSplitLine	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	_line = buffer_get_line(_ctx->buffers[_payload->buffer_id], _payload->line);
-	if (NULL == _line)
-		return (ERR_LINE_NOT_FOUND);
-	buffer_line_destroy(_ctx->buffers[_payload->buffer_id], _line);
+	t_Buffer	*_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
+
+	t_Line	*_line = buffer_get_line(_buffer, _payload->line);
+	RETURN_IF_NULL(_line, ERR_LINE_NOT_FOUND);
+
+	size_t _byte_offset = utf8_codepoint_to_byte_offset(_line->data, _payload->index);
+	if (_byte_offset <= 0 || _byte_offset >= _line->size)
+		return (ERR_INVALID_PAYLOAD);
+
+	RETURN_IF_NULL(
+		buffer_line_split(_buffer, _line, _byte_offset),
+		ERR_OPERATION_FAILED);
+
 	return (ERR_SUCCESS);
 }
 
-t_ErrorCode	cmd_buffer_line_split(t_Manager *manager, const t_Command *cmd)
+t_ErrorCode cmd_buffer_line_join(t_Manager *manager, const t_Command *cmd)
 {
-	t_WritingCtx		*_ctx;
-	t_CmdSplitLine		*_payload;
-	t_Line				*_line;
-	size_t				_byte_offset;
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdJoinLine	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	_line = buffer_get_line(_ctx->buffers[_payload->buffer_id], _payload->line);
-	if (NULL == _line)
-		return (ERR_LINE_NOT_FOUND);
-	_byte_offset = utf_char_to_byte(_line->data, _payload->index);
-	if (NULL == buffer_line_split(_ctx->buffers[_payload->buffer_id], _line, _byte_offset))
-		return (ERR_OPERATION_FAILED);
-	return (ERR_SUCCESS);
-}
+	t_Buffer	*_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
 
-t_ErrorCode	cmd_buffer_line_join(t_Manager *manager, const t_Command *cmd)
-{
-	t_WritingCtx		*_ctx;
-	t_CmdJoinLine		*_payload;
-	t_Line				*_dst;
-	t_Line				*_src;
+	t_Line	*_dst = buffer_get_line(_buffer, _payload->dst);
+	RETURN_IF_NULL(_dst, ERR_LINE_NOT_FOUND);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	_dst = buffer_get_line(_ctx->buffers[_payload->buffer_id], _payload->dst);
-	_src = buffer_get_line(_ctx->buffers[_payload->buffer_id], _payload->src);
+	t_Line	*_src = buffer_get_line(_buffer, _payload->src);
+	RETURN_IF_NULL(_dst, ERR_LINE_NOT_FOUND);
+
 	if (_src == _dst || _src->prev != _dst)
 		return (ERR_INVALID_PAYLOAD);
-	if (NULL == _dst || NULL == _src)
-		return (ERR_LINE_NOT_FOUND);
-	if (NULL == buffer_line_join(_ctx->buffers[_payload->buffer_id], _dst, _src))
-		return (ERR_OPERATION_FAILED);
+
+	RETURN_IF_NULL(buffer_line_join(_buffer, _dst, _src), ERR_OPERATION_FAILED);
 	return (ERR_SUCCESS);
 }
 
-t_ErrorCode	cmd_buffer_get_line(t_Manager *manager, const t_Command *cmd)
+t_ErrorCode cmd_buffer_get_line(t_Manager *manager, const t_Command *cmd)
 {
-	t_WritingCtx		*_ctx;
-	t_CmdGetLine		*_payload;
-	t_Line				*_line;
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdGetLine	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	_line = buffer_get_line(_ctx->buffers[_payload->buffer_id], _payload->line);
-	if (NULL == _line)
-		return (ERR_LINE_NOT_FOUND);
+	t_Buffer	*_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
+
+	t_Line	*_line = buffer_get_line(_buffer, _payload->line);
+	RETURN_IF_NULL(_line, ERR_LINE_NOT_FOUND);
+
 	_payload->out_data = _line->data;
 	_payload->out_size = _line->size;
+
 	return (ERR_SUCCESS);
 }
 
-// +===----- Data -----===+ //
+// +===----- Data functions -----===+ //
 
-t_ErrorCode	cmd_line_insert_data(t_Manager *manager, const t_Command *cmd)
+t_ErrorCode cmd_line_insert_data(t_Manager *manager, const t_Command *cmd)
 {
-	t_WritingCtx		*_ctx;
-	t_CmdInsertData		*_payload;
-	t_Line				*_line;
-	size_t				_byte_offset;
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdInsertData	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	_line = buffer_get_line(_ctx->buffers[_payload->buffer_id], _payload->line);
-	if (NULL == _line)
-		return (ERR_LINE_NOT_FOUND);
-	_byte_offset = utf_char_to_byte(_line->data, _payload->index);
-	if (false == line_insert_data(_line, _byte_offset, _payload->size, _payload->data))
-		return (ERR_OPERATION_FAILED);
+	t_Buffer *_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
+
+	t_Line *_line = buffer_get_line(_buffer, _payload->line);
+	RETURN_IF_NULL(_line, ERR_LINE_NOT_FOUND);
+
+	size_t	_byte_offset = utf8_codepoint_to_byte_offset(_line->data, _payload->index);
+	if (_byte_offset <= 0 || _byte_offset >= _line->size)
+		return (ERR_INVALID_PAYLOAD);
+
+	RETURN_IF_FALSE(
+		line_insert_data(_line, _byte_offset, _payload->size, _payload->data),
+		ERR_OPERATION_FAILED
+	);
+	
 	return (ERR_SUCCESS);
 }
 
-t_ErrorCode	cmd_line_delete_data(t_Manager *manager, const t_Command *cmd)
+t_ErrorCode cmd_line_delete_data(t_Manager *manager, const t_Command *cmd)
 {
-	t_WritingCtx		*_ctx;
-	t_CmdDeleteData		*_payload;
-	t_Line				*_line;
-	size_t				_byte_start;
-	size_t				_byte_end;
+	t_WritingCtx	*_ctx = manager->writing_ctx;
+	t_CmdInsertData	*_payload = cmd->payload;
+	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
-	_ctx = manager->writing_ctx;
-	_payload = cmd->payload;
-	if (NULL == _ctx->buffers[_payload->buffer_id])
-		return (ERR_BUFFER_NOT_FOUND);
-	_line = buffer_get_line(_ctx->buffers[_payload->buffer_id], _payload->line);
-	if (NULL == _line)
-		return (ERR_LINE_NOT_FOUND);
-	_byte_start = utf_char_to_byte(_line->data, _payload->index);
-	_byte_end = utf_char_to_byte(_line->data, _payload->index + _payload->size);
-	if (false == line_delete_data(_line, _byte_start, _byte_end - _byte_start))
-		return (ERR_OPERATION_FAILED);
+	t_Buffer *_buffer = _ctx->buffers[_payload->buffer_id];
+	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
+
+	t_Line *_line = buffer_get_line(_buffer, _payload->line);
+	RETURN_IF_NULL(_line, ERR_LINE_NOT_FOUND);
+
+	size_t	_byte_offset = utf8_codepoint_to_byte_offset(_line->data, _payload->index);
+	if (_byte_offset <= 0 || _byte_offset >= _line->size)
+		return (ERR_INVALID_PAYLOAD);
+
+	RETURN_IF_FALSE(
+		line_delete_data(_line, _byte_offset, _payload->size),
+		ERR_OPERATION_FAILED
+	);
+
 	return (ERR_SUCCESS);
 }

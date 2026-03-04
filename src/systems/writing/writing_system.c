@@ -8,14 +8,14 @@ const t_CommandEntry	writing_commands[] = {
 	{ CMD_WRITING_CREATE_BUFFER,	cmd_buffer_create},
 	{ CMD_WRITING_DELETE_BUFFER,	cmd_buffer_destroy},
 	
-	{ CMD_WRITING_INSERT_LINE,		cmd_buffer_line_insert},
-	{ CMD_WRITING_DELETE_LINE,		cmd_buffer_line_delete},
-	{ CMD_WRITING_SPLIT_LINE,		cmd_buffer_line_split},
-	{ CMD_WRITING_JOIN_LINE,		cmd_buffer_line_join},
-	{ CMD_WRITING_GET_LINE,			cmd_buffer_get_line},
+	{ CMD_WRITING_INSERT_LINE,	cmd_buffer_line_insert},
+	{ CMD_WRITING_DELETE_LINE,	cmd_buffer_line_delete},
+	{ CMD_WRITING_SPLIT_LINE,	cmd_buffer_line_split},
+	{ CMD_WRITING_JOIN_LINE,	cmd_buffer_line_join},
+	{ CMD_WRITING_GET_LINE,		cmd_buffer_get_line},
 	
-	{ CMD_WRITING_INSERT_TEXT,		cmd_line_insert_data},
-	{ CMD_WRITING_DELETE_TEXT,		cmd_line_delete_data}
+	{ CMD_WRITING_INSERT_TEXT,	cmd_line_insert_data},
+	{ CMD_WRITING_DELETE_TEXT,	cmd_line_delete_data}
 };
 
 // +===----- Functions -----===+ //

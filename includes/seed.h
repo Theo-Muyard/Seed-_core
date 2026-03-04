@@ -95,13 +95,13 @@ typedef struct	s_CmdDestroyBuffer
 typedef struct	s_CmdInsertLine
 {
 	size_t	buffer_id;	/* The buffer ID */
-	ssize_t	line;	/* The line */
+	ssize_t	line;	/* The line index */
 }	t_CmdInsertLine;
 
 typedef struct	s_CmdDeleteLine
 {
 	size_t	buffer_id;	/* The buffer ID */
-	ssize_t	line;	/* The line */
+	ssize_t	line;	/* The line index */
 }	t_CmdDeleteLine;
 
 typedef struct	s_CmdSplitLine
@@ -120,19 +120,19 @@ typedef struct	s_CmdJoinLine
 
 typedef struct	s_CmdGetLine
 {
-	size_t		buffer_id;	/* The buffer ID */
-	ssize_t		line;	/* The line */
-	const char	*out_data;	/* The data that was be readed */
-	size_t		out_size;	/* The data size */
+	size_t	buffer_id;	/* The buffer ID */
+	ssize_t	line;	/* The line */
+	char	*out_data;	/* The line data */
+	size_t	out_size;	/* The data size */
 }	t_CmdGetLine;
 
 typedef struct	s_CmdInsertData
 {
-	size_t	buffer_id;	/* The buffer ID */
-	ssize_t	line;	/* The line */
-	ssize_t	index;	/* The index */
-	size_t	size;	/* The data size */
-	char	*data;	/* The data content */
+	size_t		buffer_id;	/* The buffer ID */
+	ssize_t		line;	/* The line */
+	ssize_t		index;	/* The index */
+	size_t		size;	/* The data size */
+	const char	*data;	/* The data content */
 }	t_CmdInsertData;
 
 typedef struct	s_CmdDeleteData
