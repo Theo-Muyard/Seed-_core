@@ -40,7 +40,7 @@ char		*vfs_get_file_relative_path(const t_File *file)
 {
 	RETURN_IF_NULL(file, NULL);
 
-	char	*path = directory_get_relative_path(file->parent);
+	char	*path = vfs_get_dir_relative_path(file->parent);
 	RETURN_IF_NULL(path, NULL);
 
 	size_t	_path_len = strlen(path);
@@ -151,7 +151,7 @@ t_File	*vfs_file_create(t_Directory *parent, const char *filename)
 		return (free(file), NULL);
 }
 
-void		file_destroy(t_File *file)
+void		vfs_file_destroy(t_File *file)
 {
 	if (NULL == file)
 		return ;
@@ -270,7 +270,7 @@ bool		vfs_file_move(t_Directory *dst, t_Directory *src, t_File *file)
 	RETURN_IF_NULL(file, false);
 
 	RETURN_IF_FALSE(vfs_remove_file_to_dir(src, file), false);
-	RETURN_IF_FALSE(vfs_add_file_to_dir(src, file), false);
+	RETURN_IF_FALSE(vfs_add_file_to_dir(dst, file), false);
 
 	return (true);
 }
@@ -294,8 +294,8 @@ bool		vfs_file_rename(t_File *file, const char *filename)
 
 bool		vfs_file_is_in_dir(t_Directory *dir, t_File *file)
 {
-	TEST_NULL(dir, NULL);
-	TEST_NULL(file, NULL);
+	RETURN_IF_NULL(dir, NULL);
+	RETURN_IF_NULL(file, NULL);
 
 	size_t	_i = 0;
 	while (_i < dir->files_count)
@@ -424,7 +424,7 @@ bool		directory_subdir_move(t_Directory *dst, t_Directory *src, t_Directory *sub
 	RETURN_IF_NULL(subdir, false);
 
 	RETURN_IF_FALSE(vfs_remove_subdir_to_dir(src, subdir), false);
-	RETURN_IF_FALSE(vfs_add_subdir_to_dir(src, subdir), false);
+	RETURN_IF_FALSE(vfs_add_subdir_to_dir(dst, subdir), false);
 
 	return (true);
 }

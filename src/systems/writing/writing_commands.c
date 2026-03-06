@@ -1,4 +1,5 @@
 #include "systems/writing/writing_commands.h"
+#include "systems/writing/writing_system.h"
 
 // +===----- Static functions -----===+ //
 
@@ -194,7 +195,7 @@ t_ErrorCode cmd_buffer_line_join(t_Manager *manager, const t_Command *cmd)
 	RETURN_IF_NULL(_dst, ERR_LINE_NOT_FOUND);
 
 	t_Line	*_src = buffer_get_line(_buffer, _payload->src);
-	RETURN_IF_NULL(_dst, ERR_LINE_NOT_FOUND);
+	RETURN_IF_NULL(_src, ERR_LINE_NOT_FOUND);
 
 	if (_src == _dst || _src->prev != _dst)
 		return (ERR_INVALID_PAYLOAD);
@@ -250,7 +251,7 @@ t_ErrorCode cmd_line_insert_data(t_Manager *manager, const t_Command *cmd)
 t_ErrorCode cmd_line_delete_data(t_Manager *manager, const t_Command *cmd)
 {
 	t_WritingCtx	*_ctx = manager->writing_ctx;
-	t_CmdInsertData	*_payload = cmd->payload;
+	t_CmdDeleteData	*_payload = cmd->payload;
 	RETURN_IF_NULL(_payload, ERR_INVALID_PAYLOAD);
 
 	t_Buffer *_buffer = _ctx->buffers[_payload->buffer_id];

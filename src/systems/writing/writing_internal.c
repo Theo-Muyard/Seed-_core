@@ -72,13 +72,13 @@ t_Line		*buffer_get_line(t_Buffer *buffer, ssize_t index)
 	if (index < 0)
 		index = buffer->count;
 
-	if ((size_t)index >= buffer->count)
+	if ((size_t)index > buffer->count)
 		return (NULL);
 
 	t_Line	*_tmp = buffer->line;
 	size_t	_i = 0;
 
-	while (_tmp && _i < index - 1)
+	while (_tmp && _i < (size_t)index - 1)
 	{
 		_tmp = _tmp->next;
 		_i++;
@@ -94,7 +94,7 @@ bool		buffer_line_insert(t_Buffer *buffer, t_Line *line, ssize_t index)
 	if (index < 0)
 		index = buffer->count;
 
-	if ((size_t)index >= buffer->count)
+	if ((size_t)index > buffer->count)
 		return (NULL);
 
 	if (index == 0)

@@ -25,13 +25,22 @@ INCLUDES	=	-I includes
 # 			SRC FILES
 # | ================================================ |
 
-SRC		=	core/manager.c \
+SRC		=	common/memory.c \
+			common/systems_registry.c \
+\
 			core/dispatcher.c \
+			core/manager.c \
 \
-			tools/memory.c \
-			tools/systems.c \
+			systems/filesystem/fs_common.c \
+			systems/filesystem/fs_os.c \
+			systems/filesystem/fs_system.c \
+			systems/filesystem/fs_vfs.c \
+			systems/filesystem/fs_watcher_internal.c \
+			systems/filesystem/fs_watcher.c \
 \
-# 			TODO: add new filenames
+			systems/writing/writing_commands.c \
+			systems/writing/writing_internal.c \
+			systems/writing/writing_system.c \
 
 # | ================================================ |
 # 			OBJ FILES
@@ -43,7 +52,7 @@ OBJ		=	$(addprefix $(BUILD_DIR)/, $(SRC:.c=.o))
 # 			COLORS
 # | ================================================ |
 
-COL_WIDTH	=	35
+COL_WIDTH	=	45
 RED		=	\033[31m
 GREEN		=	\033[32m
 BLUE		=	\033[34m

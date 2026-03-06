@@ -1,5 +1,6 @@
 #include "systems/filesystem/fs_system.h"
 #include "systems/filesystem/fs_commands.h"
+#include "common/systems_registry.h"
 
 // +===----- Commands Definition -----===+ //
 

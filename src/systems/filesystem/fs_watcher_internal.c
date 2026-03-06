@@ -68,6 +68,7 @@ static void	watch_remove_one(t_WatchCtx *ctx, int wd)
 				ctx->entries + _i + 1,
 				(ctx->entry_count - _i - 1) * sizeof(t_WatchEntry *)
 			);
+			ctx->entry_count--;
 		}
 		_i++;
 	}
@@ -101,7 +102,7 @@ static bool	pending_add_one(
 	RETURN_IF_NULL(_pending, false);
 
 	_pending->from_path = ft_strdup(path);
-	GOTO_IF_NULL(_pending, exit_free_pending);
+	GOTO_IF_NULL(_pending->from_path, exit_free_pending);
 
 	_pending->cookie = cookie;
 	_pending->is_dir = isdir;
@@ -304,6 +305,7 @@ bool		watch_add_recursive(t_WatchCtx *ctx, const char *path)
 	RETURN_IF_FALSE(is_dir(path), false);
 	RETURN_IF_FALSE(watch_add_one(ctx, path), false);
 
+	int	_wd = watch_get_wd(ctx, path);
 	DIR	*_dir = opendir(path);
 	GOTO_IF_NULL(_dir, exit_watch_remove);
 
@@ -327,7 +329,6 @@ bool		watch_add_recursive(t_WatchCtx *ctx, const char *path)
 
 	/* GOTO EXIT */
 	exit_watch_remove:
-		int	_wd = watch_get_wd(ctx, path);
 		return (watch_remove_one(ctx, _wd), false);
 
 	exit_free_and_close:
@@ -418,7 +419,6 @@ t_FsEvent	*handle_event
 	struct inotify_event *event, const char *path
 )
 {
-	t_MovePending	*_pending = NULL;
 	if (event->mask & IN_MOVED_FROM)
 	{
 		pending_add_one(ctx, event->cookie, path, true);

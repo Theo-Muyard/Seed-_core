@@ -54,7 +54,7 @@ void	writing_clean(t_WritingCtx *ctx)
 		return ;
 
 	size_t	_i = 0;
-	while (_i < ctx->count)
+	while (_i < ctx->capacity)
 	{
 		buffer_destroy(ctx->buffers[_i]);
 		_i++;

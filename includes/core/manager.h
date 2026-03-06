@@ -11,8 +11,9 @@
 # define SEED_MANAGER_H
 
 # include "dispatcher.h"
-# include "systems/writing/writing_system.h"
-# include "systems/filesystem/fs_system.h"
+
+typedef struct	s_WritingCtx	t_WritingCtx;
+typedef struct	s_FileSystemCtx	t_FileSystemCtx;
 
 /* The seed API manager */
 typedef struct	s_Manager

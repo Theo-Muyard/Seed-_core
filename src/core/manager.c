@@ -1,4 +1,6 @@
 #include "core/manager.h"
+#include "systems/filesystem/fs_system.h"
+#include "systems/writing/writing_system.h"
 
 t_Manager	*manager_init(void)
 {

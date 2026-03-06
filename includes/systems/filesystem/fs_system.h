@@ -11,7 +11,6 @@
 #ifndef SEED_FILESYSTEM_SYSTEM_H
 # define SEED_FILESYSTEM_SYSTEM_H
 
-# include "dependency.h"
 # include "core/manager.h"
 # include "systems/filesystem/fs_vfs.h"
 

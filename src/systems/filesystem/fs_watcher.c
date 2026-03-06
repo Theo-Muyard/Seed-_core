@@ -1,4 +1,5 @@
 #include "systems/filesystem/fs_watcher.h"
+#include "systems/filesystem/fs_common.h"
 #include "common/memory.h"
 
 t_WatchCtx	*watcher_init(const char *path)
@@ -9,7 +10,7 @@ t_WatchCtx	*watcher_init(const char *path)
 	RETURN_IF_NULL(watcher, NULL);
 
 	int	_fd = inotify_init();
-	if (_fd < -1)
+	if (_fd < 0)
 		return (NULL);
 
 	watcher->fd = _fd;
@@ -78,7 +79,7 @@ bool		watcher_analyze(t_WatchCtx *ctx)
 	char		*_parent_path = NULL;
 	char		*_entry_path = NULL;
 	t_FsEvent	*_fs_event = NULL;
-	char		_buffer[4096] = NULL;
+	char		_buffer[4096];
 
 	size_t	_len = read(ctx->fd, _buffer, sizeof(_buffer));
 	if (_len < 0)
@@ -117,9 +118,6 @@ bool		watcher_analyze(t_WatchCtx *ctx)
 			queue_reserve(ctx, ctx->event_count + 1),
 			exit_free_path_and_event
 		);
-
-		_fs_event = handle_event(ctx, _event, _entry_path);
-		GOTO_IF_NULL(_fs_event, exit_free_path_and_event);
 
 		ctx->event_queue[_i] = _fs_event;
 		free(_entry_path);
