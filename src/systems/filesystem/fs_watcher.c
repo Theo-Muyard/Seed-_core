@@ -81,7 +81,7 @@ bool		watcher_analyze(t_WatchCtx *ctx)
 	t_FsEvent	*_fs_event = NULL;
 	char		_buffer[4096];
 
-	size_t	_len = read(ctx->fd, _buffer, sizeof(_buffer));
+	ssize_t	_len = read(ctx->fd, _buffer, sizeof(_buffer));
 	if (_len < 0)
 		return (false);
 

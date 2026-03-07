@@ -380,7 +380,7 @@ t_Directory	*directory_find_subdir(t_Directory *parent, const char *dirname)
 	return (NULL);
 }
 
-t_Directory	*directory_resolve(t_Directory *root, const char *path)
+t_Directory	*vfs_subdir_resolve(t_Directory *root, const char *path)
 {
 	RETURN_IF_NULL(root, NULL);
 	RETURN_IF_NULL(path, NULL);
@@ -417,7 +417,7 @@ t_Directory	*directory_resolve(t_Directory *root, const char *path)
 		return (ft_free_split(_tokens), NULL);
 }
 
-bool		directory_subdir_move(t_Directory *dst, t_Directory *src, t_Directory *subdir)
+bool		vfs_subdir_move(t_Directory *dst, t_Directory *src, t_Directory *subdir)
 {
 	RETURN_IF_NULL(dst, false);
 	RETURN_IF_NULL(src, false);

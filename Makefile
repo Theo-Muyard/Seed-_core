@@ -31,16 +31,17 @@ SRC		=	common/memory.c \
 			core/dispatcher.c \
 			core/manager.c \
 \
+			systems/writing/writing_commands.c \
+			systems/writing/writing_internal.c \
+			systems/writing/writing_system.c \
+\
+			systems/filesystem/fs_commands.c \
 			systems/filesystem/fs_common.c \
 			systems/filesystem/fs_os.c \
 			systems/filesystem/fs_system.c \
 			systems/filesystem/fs_vfs.c \
 			systems/filesystem/fs_watcher_internal.c \
 			systems/filesystem/fs_watcher.c \
-\
-			systems/writing/writing_commands.c \
-			systems/writing/writing_internal.c \
-			systems/writing/writing_system.c \
 
 # | ================================================ |
 # 			OBJ FILES

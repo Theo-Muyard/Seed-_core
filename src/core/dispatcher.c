@@ -72,6 +72,7 @@ bool	dispatcher_register(
 
 	if (dispatcher->count >= dispatcher->capacity)
 		return (false);
+
 	t_CommandEntry	_entry = {
 		.id = id,
 		.fn = fn

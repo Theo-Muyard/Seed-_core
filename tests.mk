@@ -22,17 +22,15 @@ INCLUDES	=	-I includes -I tests
 # 			SOURCE FILES
 # | ================================================ |
 
-TESTS_SRC	=	tests/tools.c
+# TESTS_SRC	=	tests/tools.c
 
-MANAGER_SRC	=	tests/core/TEST_manager.c
+# MANAGER_SRC	=	tests/core/TEST_manager.c
 
-DISPATCHER_SRC	=	tests/core/TEST_dispatcher.c
+# DISPATCHER_SRC	=	tests/core/TEST_dispatcher.c
 
-WRITING_SRC	=	tests/systems/writing/TEST_writing_internal.c \
-			tests/systems/writing/TEST_writing_commands.c \
-			tests/systems/writing/TEST_writing_main.c
+WRITING_SRC	=	tests/writing.c
 
-FS_SRC		=	tests/systems/filesystem/TEST_fs.c
+# FS_SRC		=	tests/systems/filesystem/TEST_fs.c
 
 
 # | ================================================ |

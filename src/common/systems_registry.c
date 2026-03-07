@@ -12,7 +12,7 @@ bool	register_commands(
 	while (_i < count)
 	{
 		RETURN_IF_FALSE(
-			dispatcher_register(dispatcher, commands->id, commands->fn),
+			dispatcher_register(dispatcher, commands[_i].id, commands[_i].fn),
 			false
 		);
 		_i++;
