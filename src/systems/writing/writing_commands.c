@@ -131,8 +131,8 @@ t_ErrorCode cmd_buffer_line_insert(t_Manager *manager, const t_Command *cmd)
 	t_Buffer	*_buffer = _ctx->buffers[_payload->buffer_id];
 	RETURN_IF_NULL(_buffer, ERR_BUFFER_NOT_FOUND);
 
-	if (_payload->line < -1)
-		_payload->line = _buffer->count - 1;
+	if (_payload->line <= -1)
+		_payload->line = _buffer->count ? _buffer->count - 1 : 0;
 
 	if ((size_t)_payload->line > _buffer->count)
 		return (ERR_LINE_NOT_FOUND);
@@ -251,9 +251,18 @@ t_ErrorCode cmd_line_insert_data(t_Manager *manager, const t_Command *cmd)
 	t_Line *_line = buffer_get_line(_buffer, _payload->line);
 	RETURN_IF_NULL(_line, ERR_LINE_NOT_FOUND);
 
-	size_t	_byte_offset = utf8_codepoint_to_byte_offset(_line->data, _payload->index);
-	if (_byte_offset <= 0 || _byte_offset >= _line->size)
-		return (ERR_INVALID_PAYLOAD);
+	if (_payload->index <= -1)
+		_payload->index = _line->size ? _line->size - 1 : 0;
+
+	size_t	_byte_offset = 0;
+	if (_line->size > 0 && _payload->index != 0)
+	{
+		printf("payload index: %zd\n", _payload->index);
+		_byte_offset = utf8_codepoint_to_byte_offset(_line->data, _payload->index);
+		printf("byte offset: %zd\n", _byte_offset);
+		if (_byte_offset <= 0 || _byte_offset >= _line->size)
+			return (ERR_INVALID_PAYLOAD);
+	}
 
 	RETURN_IF_FALSE(
 		line_insert_data(_line, _byte_offset, _payload->size, _payload->data),

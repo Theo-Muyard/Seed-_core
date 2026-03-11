@@ -29,7 +29,7 @@ void		buffer_destroy(t_Buffer *buffer)
 
 // +===----- Line functions -----===+ //
 
-t_Line		*line_create(void)
+t_Line	*line_create(void)
 {
 	t_Line	*line = malloc(sizeof(t_Line));
 	RETURN_IF_NULL(line, NULL);
@@ -65,12 +65,12 @@ void		buffer_line_destroy(t_Buffer *buffer, t_Line *line)
 	free(line);
 }
 
-t_Line		*buffer_get_line(t_Buffer *buffer, ssize_t index)
+t_Line	*buffer_get_line(t_Buffer *buffer, ssize_t index)
 {
 	RETURN_IF_NULL(buffer, NULL);
 
 	if (index < 0)
-		index = buffer->count;
+		index = buffer->count ? buffer->count - 1 : 0;
 
 	if ((size_t)index > buffer->count)
 		return (NULL);
@@ -78,7 +78,7 @@ t_Line		*buffer_get_line(t_Buffer *buffer, ssize_t index)
 	t_Line	*_tmp = buffer->line;
 	size_t	_i = 0;
 
-	while (_tmp && _i < (size_t)index - 1)
+	while (_tmp && _i < (size_t)index)
 	{
 		_tmp = _tmp->next;
 		_i++;
@@ -121,7 +121,7 @@ bool		buffer_line_insert(t_Buffer *buffer, t_Line *line, ssize_t index)
 	return (true);
 }
 
-t_Line		*buffer_line_split(t_Buffer *buffer, t_Line *line, size_t index)
+t_Line	*buffer_line_split(t_Buffer *buffer, t_Line *line, size_t index)
 {
 	RETURN_IF_NULL(buffer, NULL);
 	RETURN_IF_NULL(line, NULL);
@@ -159,7 +159,7 @@ t_Line		*buffer_line_split(t_Buffer *buffer, t_Line *line, size_t index)
 		return (buffer_line_destroy(buffer, _new_line), NULL);
 }
 
-t_Line		*buffer_line_join(t_Buffer *buffer, t_Line *dst, t_Line *src)
+t_Line	*buffer_line_join(t_Buffer *buffer, t_Line *dst, t_Line *src)
 {
 	RETURN_IF_NULL(buffer, NULL);
 	RETURN_IF_NULL(dst, NULL);
@@ -201,17 +201,21 @@ bool		line_insert_data(t_Line *line, ssize_t index, size_t size, const char *dat
 		line->capacity = _new_capacity;
 	}
 
+	size_t	_insert_size = size;
+	if (size > 0 && data[size - 1] == '\0')
+		_insert_size--;
+
 	memmove(
-		line->data + index + size,
+		line->data + index + _insert_size,
 		line->data + index,
 		line->size - index
 	);
 
-	memcpy(line->data + index, data, size);
-	
-	line->size += size;
+	memcpy(line->data + index, data, _insert_size);
+
+	line->size += _insert_size;
 	line->data[line->size] = '\0';
-	
+
 	return (true);
 }
 

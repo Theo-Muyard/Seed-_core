@@ -2,21 +2,21 @@
 # 			NAMES
 # | ================================================ |
 
-NAME		=	seed_test
-BUILD_DIR	=	build/tests
+NAME			=	seed_test
+BUILD_DIR		=	build/tests
 SEED_ARCHIVE	=	seed_core.a
 
 # | ================================================ |
 # 			COMPILATION
 # | ================================================ |
 
-CC		=	cc
+CC			=	cc
 CFLAGS		=	-Wall -Wextra -Werror
 
 # | ================================================ |
 # 			INCLUDES
 # | ================================================ |
-INCLUDES	=	-I includes -I tests
+INCLUDES		=	-I includes -I tests
 
 # | ================================================ |
 # 			SOURCE FILES
@@ -43,7 +43,7 @@ MANAGER_OBJ	=	$(addprefix $(BUILD_DIR)/, $(notdir $(MANAGER_SRC:.c=.o)))
 
 DISPATCHER_OBJ	=	$(addprefix $(BUILD_DIR)/, $(notdir $(DISPATCHER_SRC:.c=.o)))
 
-WRITING_OBJ	=	$(addprefix $(BUILD_DIR)/, $(notdir $(WRITING_SRC:.c=.o)))
+WRITING_OBJ		=	$(addprefix $(BUILD_DIR)/, $(notdir $(WRITING_SRC:.c=.o)))
 
 FS_OBJ		=	$(addprefix $(BUILD_DIR)/, $(notdir $(FS_SRC:.c=.o)))
 
