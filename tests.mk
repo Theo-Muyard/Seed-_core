@@ -16,13 +16,14 @@ CFLAGS		=	-Wall -Wextra -Werror
 # | ================================================ |
 # 			INCLUDES
 # | ================================================ |
+
 INCLUDES		=	-I includes -I tests
 
 # | ================================================ |
 # 			SOURCE FILES
 # | ================================================ |
 
-TESTS_SRC		=	tests/commands.c
+TESTS_SRC		=	tests/tools.c
 
 WRITING_SRC		=	tests/writing.c
 

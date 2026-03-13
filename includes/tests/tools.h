@@ -9,7 +9,34 @@
 
 # include "seed.h"
 
+// +===----- Macros -----===+ //
+
+#define RED		"\033[31m"
+#define GREEN	"\033[32m"
+#define YELLOW	"\033[33m"
+#define BLUE	"\033[34m"
+#define WHITE	"\033[37m"
+#define RESET	"\033[0m"
+
+#define print_error_code(msg) \
+	do { printf("%sError:%s %s\n", RED, RESET, msg); } while (0)
+
+#define print_section(msg) \
+	do { printf("\n%s=== %s ===%s\n", BLUE, msg, WHITE); } while (0)
+
+#define print_success(msg) \
+	do { printf("%s✓ %s%s\n", GREEN, msg, RESET); } while (0)
+
+#define print_error(msg) \
+	do { printf("%s✗ %s%s\n", RED, msg, RESET); } while (0)
+
+#define RETURN_IF_ERR(code) \
+	do { if (code) return (handle_errors(code)); } while (0)
+
 // +===----- Functions -----===+ //
+
+int		handle_errors(t_ErrorCode code);
+
 
 t_ErrorCode	test_buffer_create(t_Manager *manager, t_CmdCreateBuffer *payload);
 

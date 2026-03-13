@@ -1,4 +1,49 @@
-#include "tests/commands.h"
+#include "tests/tools.h"
+
+int		handle_errors(t_ErrorCode code)
+{
+	if (code == 0)
+		return (0);
+
+	if (code == 1)
+		print_error_code("Internal memory.");
+	else if (code == 2)
+		print_error_code("Operation failed.");
+	else if (code == 3)
+		print_error_code("Permission denied.");
+	else if (code == 4)
+		print_error_code("Invalid manager.");
+	else if (code == 5)
+		print_error_code("Invalid payload.");
+	else if (code == 6)
+		print_error_code("Invalid command.");
+	else if (code == 7)
+		print_error_code("Invalid command ID.");
+	else if (code == 8)
+		print_error_code("Dispatcher not initialized.");
+	else if (code == 9)
+		print_error_code("Writing context not initialized.");
+	else if (code == 10)
+		print_error_code("Filesystem context not initialized.");
+	else if (code == 11)
+		print_error_code("Buffer not found.");
+	else if (code == 12)
+		print_error_code("Line not found.");
+	else if (code == 13)
+		print_error_code("Folder not found.");
+	else if (code == 14)
+		print_error_code("Folder access denied.");
+	else if (code == 15)
+		print_error_code("Folder already exists.");
+	else if (code == 16)
+		print_error_code("File not found.");
+	else if (code == 17)
+		print_error_code("File access denied.");
+	else if (code == 18)
+		print_error_code("File already exists.");
+
+	return (1);
+}
 
 t_ErrorCode	test_buffer_create(t_Manager *manager, t_CmdCreateBuffer *payload)
 {

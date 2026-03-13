@@ -1,75 +1,7 @@
-#include "tests/commands.h"
+#include "tests/tools.h"
 
 #include "core/manager.h"
 #include "systems/writing/writing_system.h"
-
-#define RED		"\033[31m"
-#define GREEN	"\033[32m"
-#define YELLOW	"\033[33m"
-#define BLUE	"\033[34m"
-#define WHITE	"\033[37m"
-#define RESET	"\033[0m"
-
-#define print_error_code(msg) \
-	do { printf("%sError:%s %s\n", RED, RESET, msg); } while (0)
-
-#define print_section(msg) \
-	do { printf("\n%s=== %s ===%s\n", BLUE, msg, WHITE); } while (0)
-
-#define print_success(msg) \
-	do { printf("%s✓ %s%s\n", GREEN, msg, RESET); } while (0)
-
-#define print_error(msg) \
-	do { printf("%s✗ %s%s\n", RED, msg, RESET); } while (0)
-
-#define RETURN_IF_ERR(code) \
-	do { if (code) return (handle_errors(code)); } while (0)
-
-
-static int	handle_errors(t_ErrorCode code)
-{
-	if (code == 0)
-		return (0);
-
-	if (code == 1)
-		print_error_code("Internal memory.");
-	else if (code == 2)
-		print_error_code("Operation failed.");
-	else if (code == 3)
-		print_error_code("Permission denied.");
-	else if (code == 4)
-		print_error_code("Invalid manager.");
-	else if (code == 5)
-		print_error_code("Invalid payload.");
-	else if (code == 6)
-		print_error_code("Invalid command.");
-	else if (code == 7)
-		print_error_code("Invalid command ID.");
-	else if (code == 8)
-		print_error_code("Dispatcher not initialized.");
-	else if (code == 9)
-		print_error_code("Writing context not initialized.");
-	else if (code == 10)
-		print_error_code("Filesystem context not initialized.");
-	else if (code == 11)
-		print_error_code("Buffer not found.");
-	else if (code == 12)
-		print_error_code("Line not found.");
-	else if (code == 13)
-		print_error_code("Folder not found.");
-	else if (code == 14)
-		print_error_code("Folder access denied.");
-	else if (code == 15)
-		print_error_code("Folder already exists.");
-	else if (code == 16)
-		print_error_code("File not found.");
-	else if (code == 17)
-		print_error_code("File access denied.");
-	else if (code == 18)
-		print_error_code("File already exists.");
-
-	return (1);
-}
 
 int	test_buffer_command(t_Manager *manager)
 {
@@ -132,7 +64,7 @@ int	test_line_command(t_Manager *manager)
 			"First line!"
 		)
 	);
-	
+
 	RETURN_IF_ERR(
 		test_insert_data(
 			manager,
@@ -149,6 +81,8 @@ int	test_line_command(t_Manager *manager)
 		)
 	);
 
+	print_success("Lines created correctly.");
+
 	RETURN_IF_ERR(test_line_join(manager, _buffer_id, 0, 1));
 
 	t_CmdGetLine	_line_get_payload = {
@@ -157,18 +91,58 @@ int	test_line_command(t_Manager *manager)
 	};
 
 	RETURN_IF_ERR(test_get_line(manager, &_line_get_payload));
-	printf("DATA: %s\n", _line_get_payload.out_data);
+
+	if (strncmp(
+		_line_get_payload.out_data,
+		"First line!Second line!",
+		_line_get_payload.out_size
+	) != 0)
+	{
+		print_error("The lines has not been correctly joined.");
+		return (1);
+	}
+
+	print_success("Lines joined correctly.");
 
 	RETURN_IF_ERR(test_line_split(manager, _buffer_id, 0, 11));
 
 	RETURN_IF_ERR(test_get_line(manager, &_line_get_payload));
-	printf("DATA: %s\n", _line_get_payload.out_data);
+	
+	if (strncmp(
+		_line_get_payload.out_data,
+		"First line!",
+		_line_get_payload.out_size
+	) != 0)
+	{
+		print_error("The line has not been correctly splited.");
+		return (1);
+	}
 
 	_line_get_payload.line = 1;
 	RETURN_IF_ERR(test_get_line(manager, &_line_get_payload));
-	printf("DATA: %s\n", _line_get_payload.out_data);
+	
+	if (strncmp(
+		_line_get_payload.out_data,
+		"Second line!",
+		_line_get_payload.out_size
+	) != 0)
+	{
+		print_error("The line has not been correctly splited.");
+		return (1);
+	}
 
-	print_success("Lines created correctly.");
+	print_success("Lines splited correctly.");
+
+	RETURN_IF_ERR(test_line_delete(manager, _buffer_id, 2));
+
+	_line_get_payload.line = 2;
+	if (!test_get_line(manager, &_line_get_payload))
+	{
+		print_error("The line has not been deleted.");
+		return (1);
+	}
+
+	print_success("Lines deleted correctly.");
 
 	return (0);
 }
